@@ -22,14 +22,14 @@ class TextWithPadding extends StatelessWidget {
             child: Text(
               label,
               style: const TextStyle(
-                fontSize: 16.0,
+                fontSize: 14.0,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
           const SizedBox(width: 12),
           const SizedBox(
-            width: 20, // Adjust the width as needed
+            width: 20,
             child: Text(
               ':',
               style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),

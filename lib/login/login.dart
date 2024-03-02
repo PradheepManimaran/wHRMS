@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:logger/logger.dart';
 import 'package:wHRMS/apiHandlar/baseUrl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wHRMS/View/forgotPassword.dart';
@@ -21,7 +20,7 @@ class UserLoginScreen extends StatefulWidget {
 class _UserLoginScreenState extends State<UserLoginScreen> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-  final Logger _logger = Logger();
+  // final Logger _logger = Logger();
 
   bool _isPasswordVisible = false;
 
@@ -82,6 +81,8 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
           ),
         );
 
+        // print('Login Response Body: ${response.body}');
+
         // Add the latest email to the list
         globalEmails.add(email);
 
@@ -111,8 +112,8 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
           );
         }
       } else if (response.statusCode == 400) {
-        final errorMessage = json.decode(response.body)['message'];
-        print('Login failed: $errorMessage');
+        // final errorMessage = json.decode(response.body)['message'];
+        // print('Login failed: $errorMessage');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             backgroundColor: Colors.red,
@@ -120,7 +121,7 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
           ),
         );
       } else if (response.statusCode == 500) {
-        print('Api url: $apiUrl');
+        // print('Api url: $apiUrl');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             backgroundColor: Colors.red,
@@ -136,8 +137,8 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
         );
       }
     } catch (e) {
-      _logger.e('Error during login: $e');
-      print('Error: $e');
+      // _logger.e('Error during login: $e');
+      // print('Error: $e');
       if (e is SocketException) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -173,34 +174,36 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
               Container(
                 decoration: BoxDecoration(
                   boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 0.1,
-                      blurRadius: 0.1,
-                      offset: const Offset(0, 0.5),
-                    ),
+                    // BoxShadow(
+                    //   color: Colors.grey.withOpacity(0.5),
+                    //   spreadRadius: 0.1,
+                    //   blurRadius: 0.1,
+                    //   offset: const Offset(0, 0.5),
+                    // ),
                   ],
                 ),
                 child: TextField(
                   controller: emailController,
                   decoration: InputDecoration(
-                    prefix: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: SizedBox(
-                        width: 5,
-                        child: Container(
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
+                    // prefix: Padding(
+                    //   padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    //   child: SizedBox(
+                    //     width: 5,
+                    //     child: Container(
+                    //       color: Colors.black,
+                    //     ),
+                    //   ),
+                    // ),
                     prefixIcon: const Icon(Icons.person),
                     hintText: 'Employee ID or Phone Number',
                     labelStyle: const TextStyle(fontSize: 10),
-                    enabledBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Color(0xFF9E9E9E)),
+                      borderRadius: BorderRadius.circular(7),
                     ),
-                    focusedBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(7),
                     ),
                     filled: true,
                     fillColor: Colors.grey[100],
@@ -211,34 +214,35 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
               Container(
                 decoration: BoxDecoration(
                   boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 0.1,
-                      blurRadius: 0.1,
-                      offset: const Offset(0, 0.5),
-                    ),
+                    // BoxShadow(
+                    //   color: Colors.grey.withOpacity(0.5),
+                    //   spreadRadius: 0.1,
+                    //   blurRadius: 0.1,
+                    //   offset: const Offset(0, 0.5),
+                    // ),
                   ],
                 ),
                 child: TextField(
                   controller: passwordController,
-                  obscureText:
-                      !_isPasswordVisible, // Modify this line to toggle visibility
+                  obscureText: !_isPasswordVisible,
                   decoration: InputDecoration(
-                    enabledBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Color(0xFF9E9E9E)),
+                      borderRadius: BorderRadius.circular(7),
                     ),
-                    focusedBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: const BorderSide(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(7),
                     ),
-                    prefix: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                      child: SizedBox(
-                        width: 5,
-                        child: Container(
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
+                    // prefix: Padding(
+                    //   padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    //   child: SizedBox(
+                    //     width: 5,
+                    //     child: Container(
+                    //       color: Colors.black,
+                    //     ),
+                    //   ),
+                    // ),
                     prefixIcon: const Icon(Icons.password),
                     suffixIcon: IconButton(
                       color: Colors.grey,
@@ -262,13 +266,13 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
               Align(
                 alignment: Alignment.center,
                 child: SizedBox(
-                  width: 340.0,
+                  width: double.infinity,
                   height: 60.0,
                   child: ElevatedButton(
                     onPressed: () => loginUser(context),
                     style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(1.0),
+                        borderRadius: BorderRadius.circular(6.0),
                       ),
                       backgroundColor: ThemeColor.app_bar,
                     ),

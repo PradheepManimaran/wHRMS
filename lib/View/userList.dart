@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:wHRMS/Components/employees.dart';
 import 'package:wHRMS/Components/information_widget.dart';
 import 'package:wHRMS/ThemeColor/theme.dart';
+import 'package:wHRMS/objects/adminemployee.dart';
 
 class UserListScreen extends StatefulWidget {
   final Employee employee;
@@ -25,7 +25,7 @@ class _UserListScreenState extends State<UserListScreen> {
         ? widget.employee.userProfilePicture[0].profilePicture
         : null;
 
-    print('Profile Picture URL: $profilePictureUrl');
+    // print('Profile Picture URL: $profilePictureUrl');
 
     return Scaffold(
       appBar: AppBar(
@@ -88,26 +88,30 @@ class _UserListScreenState extends State<UserListScreen> {
               ),
               const SizedBox(height: 20),
               TextWithPadding(
-                label: 'Name:',
+                label: 'Employee Id',
+                value: widget.employee.employeeId,
+              ),
+              TextWithPadding(
+                label: 'Name',
                 value: widget.employee.username,
               ),
               // const SizedBox(height: 15),
               TextWithPadding(
-                label: 'Email:',
+                label: 'Email',
                 value: widget.employee.email,
               ),
               TextWithPadding(
-                label: 'Role:',
+                label: 'Role',
                 value: widget.employee.role.toString(),
               ),
               // const SizedBox(height: 15),
               TextWithPadding(
-                label: 'Phone Number:',
+                label: 'Phone Number',
                 value: widget.employee.phoneNumber,
               ),
               const SizedBox(height: 15),
               TextWithPadding(
-                label: 'Date Of Joining:',
+                label: 'Date Of Joining',
                 value: widget.employee.dateOfJoining,
               ),
               const SizedBox(height: 20),
@@ -132,21 +136,21 @@ class _UserListScreenState extends State<UserListScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         TextWithPadding(
-                          label: 'Company Name:',
+                          label: 'Company Name',
                           value: experience.companyName,
                         ),
                         TextWithPadding(
-                          label: 'Designation: ',
+                          label: 'Designation',
                           value: experience.designation,
                         ),
                         TextWithPadding(
-                            label: 'From Date:  ', value: experience.fromDate),
+                            label: 'From Date', value: experience.fromDate),
                         TextWithPadding(
-                          label: 'To Date:',
+                          label: 'To Date',
                           value: experience.toDate,
                         ),
                         TextWithPadding(
-                          label: 'Description: ',
+                          label: 'Description',
                           value: experience.description,
                         ),
                       ],
@@ -175,23 +179,23 @@ class _UserListScreenState extends State<UserListScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         TextWithPadding(
-                          label: 'University Name:',
+                          label: 'University Name',
                           value: experience.universityName,
                         ),
                         TextWithPadding(
-                          label: 'Degree: ',
+                          label: 'Degree',
                           value: experience.degree,
                         ),
                         TextWithPadding(
-                          label: 'Specialization:',
+                          label: 'Specialization',
                           value: experience.specialization,
                         ),
                         TextWithPadding(
-                          label: 'CGPA: ',
+                          label: 'CGPA',
                           value: experience.cgpa,
                         ),
                         TextWithPadding(
-                          label: 'complete Year:',
+                          label: 'complete Year',
                           value: experience.completeyear,
                         ),
                       ],

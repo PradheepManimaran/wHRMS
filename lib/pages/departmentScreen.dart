@@ -1,8 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:logger/logger.dart';
 import 'package:http/http.dart' as http;
 import 'package:wHRMS/ThemeColor/theme.dart';
 import 'package:wHRMS/apiHandlar/baseUrl.dart';
@@ -24,11 +24,12 @@ class Department {
 }
 
 class _DepartmentScreenState extends State<DepartmentScreen> {
-  final Logger _logger = Logger();
+  // final Logger _logger = Logger();
 
   final List<Department> department = [];
   TextEditingController nameController = TextEditingController();
   List<String> departmentData = [];
+  Timer? _timer;
 
   @override
   void initState() {
@@ -37,9 +38,19 @@ class _DepartmentScreenState extends State<DepartmentScreen> {
     _initAuthToken();
   }
 
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
   Future<void> _initAuthToken() async {
-    String token = await getAuthToken() as String;
-    _fetchDepartment(token);
+    // String token = await getAuthToken() as String;
+    _fetchDepartment();
+
+    _timer ??= Timer.periodic(const Duration(seconds: 1), (timer) {
+      _fetchDepartment();
+    });
   }
 
   Future<String?> getAuthToken() async {
@@ -47,10 +58,12 @@ class _DepartmentScreenState extends State<DepartmentScreen> {
     return prefs.getString('token');
   }
 
-  Future<void> _fetchDepartment(String token) async {
+  Future<void> _fetchDepartment() async {
     const String roleApiUrl = '${URLConstants.baseUrl}/api/department';
 
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String token = prefs.getString('token') ?? '';
       final response = await http.get(
         Uri.parse(roleApiUrl),
         headers: {
@@ -60,9 +73,9 @@ class _DepartmentScreenState extends State<DepartmentScreen> {
       );
 
       if (response.statusCode == 200) {
-        _logger.d('Department Status Code : ${response.statusCode}');
-        _logger.d('Department fetched successfully');
-        _logger.d('Department response Body: ${response.body}');
+        // _logger.d('Department Status Code : ${response.statusCode}');
+        // _logger.d('Department fetched successfully');
+        // _logger.d('Department response Body: ${response.body}');
 
         final dynamic enrollData = json.decode(response.body);
 
@@ -77,13 +90,13 @@ class _DepartmentScreenState extends State<DepartmentScreen> {
             department.addAll(departmentList);
           });
         } else {
-          print('Invalid Department data format: $enrollData');
-          _showSnackBar('Invalid Department data format');
+          // print('Invalid Department data format: $enrollData');
+          // _showSnackBar('Invalid Department data format');
         }
       } else {
-        print('Error fetching Department. Status code: ${response.statusCode}');
-        print('Department Response body: ${response.body}');
-        print('Token : $token');
+        // print('Error fetching Department. Status code: ${response.statusCode}');
+        // print('Department Response body: ${response.body}');
+        // print('Token : $token');
       }
     } catch (e) {
       _handleError(e);
@@ -97,7 +110,7 @@ class _DepartmentScreenState extends State<DepartmentScreen> {
       String? token = await getAuthToken();
 
       if (token == null) {
-        print('Token not found in shared preferences');
+        // print('Token not found in shared preferences');
         return;
       }
       final name = nameController.text;
@@ -113,8 +126,8 @@ class _DepartmentScreenState extends State<DepartmentScreen> {
       );
 
       if (response.statusCode == 201) {
-        _logger.d('Department Status Code : ${response.statusCode}');
-        _logger.d('Department fetched successfully');
+        // _logger.d('Department Status Code : ${response.statusCode}');
+        // _logger.d('Department fetched successfully');
 
         // Parse the response body as a Map
         final Map<String, dynamic> responseBody = json.decode(response.body);
@@ -134,10 +147,32 @@ class _DepartmentScreenState extends State<DepartmentScreen> {
             nameController.addAll(nameController);
           });
         }
-      } else {
-        print(
-            'Post Error fetching Department. Status code: ${response.statusCode}');
-        print('Post Department Response body: ${response.body}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.green,
+            content: Text('Department add successfully'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      } else if (response.statusCode == 400) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.red,
+            content: Text('Bad Request'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        // print(
+        //     'Post Error fetching Department. Status code: ${response.statusCode}');
+        // print('Post Department Response body: ${response.body}');
+      } else if (response.statusCode == 500) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.red,
+            content: Text('Internal Server Error'),
+            duration: Duration(seconds: 2),
+          ),
+        );
       }
     } catch (e) {
       _handleError(e);
@@ -145,8 +180,8 @@ class _DepartmentScreenState extends State<DepartmentScreen> {
   }
 
   void _handleError(dynamic e) {
-    _logger.e('Error: $e');
-    print('Error: $e');
+    // _logger.e('Error: $e');
+    // print('Error: $e');
     if (e is SocketException) {
       _showSnackBar('No Internet Connection');
     }

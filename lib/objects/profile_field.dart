@@ -1,14 +1,13 @@
 class EmployeesField {
-  final int id;
+  final String id;
   final String username;
-
   final String emailid;
 
   EmployeesField(this.id, this.username, this.emailid);
 
   factory EmployeesField.fromJson(Map<String, dynamic> json) {
     return EmployeesField(
-      json['id'] as int? ?? 0,
+      json['employee_id'] as String? ?? '',
       json['username'] as String? ?? '',
       json['email'] as String? ?? '',
     );

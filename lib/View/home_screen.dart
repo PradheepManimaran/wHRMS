@@ -6,7 +6,6 @@ import 'package:wHRMS/View/adminleavelist.dart';
 import 'package:wHRMS/View/attenance.dart';
 import 'package:wHRMS/View/customnav.dart';
 import 'package:wHRMS/View/dashboard.dart';
-import 'package:wHRMS/View/employee_form.dart';
 import 'package:wHRMS/View/employee_profile.dart';
 import 'package:wHRMS/View/leave_list.dart';
 import 'package:wHRMS/apiHandlar/baseUrl.dart';
@@ -112,8 +111,8 @@ class _HomeScreen extends State<HomeScreen> {
 
       if (response.statusCode == 200) {
         prefs.remove('token');
-        print('Logged out');
-        print('Token after logout: ${prefs.getString('token')}');
+        // print('Logged out');
+        // print('Token after logout: ${prefs.getString('token')}');
 
         // Show SnackBar for successful logout
         ScaffoldMessenger.of(context).showSnackBar(
@@ -129,9 +128,20 @@ class _HomeScreen extends State<HomeScreen> {
             builder: (context) => const UserLoginScreen(),
           ),
         );
-      } else {
+      } else if (response.statusCode == 40) {
         // Handle errors or unexpected responses here
-        print('Failed to logout. Status code: ${response.statusCode}');
+        // print('Failed to logout. Status code: ${response.statusCode}');
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.green,
+            content: Text('Logged out successfully.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      } else if (response.statusCode == 401) {
+        // Handle errors or unexpected responses here
+        // print('Failed to logout. Status code: ${response.statusCode}');
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -143,7 +153,7 @@ class _HomeScreen extends State<HomeScreen> {
       }
     } catch (error) {
       // Handle network errors or exceptions here
-      print('Error during logout: $error');
+      // print('Error during logout: $error');
     }
   }
 
@@ -152,8 +162,8 @@ class _HomeScreen extends State<HomeScreen> {
 
     prefs.remove('token');
 
-    print('Logged out');
-    print('Token after logout: ${prefs.getString('token')}');
+    // print('Logged out');
+    // print('Token after logout: ${prefs.getString('token')}');
 
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
@@ -376,7 +386,7 @@ class _HomeScreen extends State<HomeScreen> {
                     // Navigator.push(
                     //   context,
                     //   MaterialPageRoute(
-                    //     builder: ((context) => const RoleScreen()),
+                    //     builder: ((context) => DarkLightModeScreen()),
                     //   ),
                     // );
                   },

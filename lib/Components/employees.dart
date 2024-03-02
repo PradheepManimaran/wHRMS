@@ -1,15 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:logger/logger.dart';
 import 'package:wHRMS/View/create_employee.dart';
 import 'package:wHRMS/View/userList.dart';
 import 'package:wHRMS/apiHandlar/baseUrl.dart';
-import 'package:wHRMS/objects/education.dart';
-import 'package:wHRMS/objects/work_experience.dart';
+import 'package:wHRMS/objects/adminemployee.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shimmer/shimmer.dart';
 
 class EmployeeScreen extends StatefulWidget {
   const EmployeeScreen({Key? key}) : super(key: key);
@@ -21,7 +18,7 @@ class EmployeeScreen extends StatefulWidget {
 class _EmployeeScreenState extends State<EmployeeScreen> {
   List<Employee> employees = [];
   bool isLoading = true;
-  final Logger _logger = Logger();
+  // final Logger _logger = Logger();
 
   @override
   void initState() {
@@ -47,7 +44,7 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
         },
       );
 
-      _logger.d('Testing Response Body: ${response.body}');
+      // _logger.d('Testing Response Body: ${response.body}');
       if (response.statusCode == 200) {
         final dynamic data = jsonDecode(response.body);
 
@@ -62,17 +59,17 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
             isLoading = false;
           });
         } else {
-          print('Unexpected response format');
-          _logger.d('Error ResponseBody: ${response.body}');
+          // print('Unexpected response format');
+          // _logger.d('Error ResponseBody: ${response.body}');
         }
       } else {
-        print(
-            'Failed to load employee data. Status code: ${response.statusCode}');
-        print('Response body: ${response.body}');
-        _logger.d('Error Response Body: ${response.body}');
+        // print(
+        //     'Failed to load employee data. Status code: ${response.statusCode}');
+        // print('Response body: ${response.body}');
+        // _logger.d('Error Response Body: ${response.body}');
       }
     } catch (e) {
-      print('Error loading employee data: $e');
+      // print('Error loading employee data: $e');
     }
   }
 
@@ -84,7 +81,7 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            const SizedBox(height: 15),
+            // const SizedBox(height: 15),
             Row(
               children: [
                 const Align(
@@ -121,12 +118,24 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 15),
+                // const SizedBox(height: 15),
               ],
             ),
-            const SizedBox(height: 10),
+            // const SizedBox(height: 10),
             isLoading
-                ? _buildShimmerLoading()
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(height: 10.0),
+                      _buildShimmerLoading(),
+                      _buildShimmerLoading(),
+                      _buildShimmerLoading(),
+                      _buildShimmerLoading(),
+                      _buildShimmerLoading(),
+                      _buildShimmerLoading(),
+                    ],
+                  )
                 : Center(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -145,124 +154,48 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
   }
 
   Widget _buildShimmerLoading() {
-    return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
-      period: const Duration(seconds: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            height: 120,
-            child: Card(
-              elevation: 1,
-              margin: const EdgeInsets.symmetric(vertical: 5),
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 120,
-                    child: CircleAvatar(
-                      backgroundColor: Colors.blue,
-                      radius: 40,
-                    ),
-                  ),
-                  Expanded(
-                    child: ListTile(
-                      title: Container(
-                        color: Colors.white,
-                        height: 16,
-                      ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            color: Colors.white,
-                            height: 16,
-                          ),
-                          Container(
-                            color: Colors.white,
-                            height: 14,
-                          ),
-                          Container(
-                            color: Colors.white,
-                            height: 14,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+    return SizedBox(
+      height: 120,
+      child: Card(
+        elevation: 1,
+        // margin: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 120,
+              child: CircleAvatar(
+                backgroundColor: Colors.grey[300]!,
+                radius: 40,
               ),
             ),
-          ),
-        ],
+            Expanded(
+              child: ListTile(
+                title: Container(
+                  color: Colors.white,
+                  height: 16,
+                ),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      color: Colors.white,
+                      height: 16,
+                    ),
+                    Container(
+                      color: Colors.white,
+                      height: 14,
+                    ),
+                    Container(
+                      color: Colors.white,
+                      height: 14,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
-    );
-  }
-}
-
-class Employee {
-  final int id;
-  final String username;
-  final String email;
-  final String employeeId;
-  final String phoneNumber;
-  final String role;
-  final String department;
-  final String designation;
-  final String enrollmentType;
-  final String enrollmentStatus;
-  final String sourceHire;
-  final String dateOfJoining;
-  final List<UserProfilePicture> userProfilePicture;
-  final List<WorkExperience> workExperience;
-  final List<EducationDetails> education;
-
-  Employee({
-    required this.id,
-    required this.username,
-    required this.email,
-    required this.employeeId,
-    required this.phoneNumber,
-    required this.role,
-    required this.department,
-    required this.designation,
-    required this.enrollmentType,
-    required this.enrollmentStatus,
-    required this.sourceHire,
-    required this.dateOfJoining,
-    required this.userProfilePicture,
-    required this.workExperience,
-    required this.education,
-  });
-
-  factory Employee.fromJson(Map<String, dynamic> json) {
-    return Employee(
-      id: json['id'],
-      username: json['username'],
-      email: json['email'],
-      employeeId: json['employee_id'],
-      phoneNumber: json['phone_number'],
-      role: json['role']['name'],
-      department: json['department']['name'],
-      designation: json['designation']['name'],
-      enrollmentType: json['enrollment_type']['name'],
-      enrollmentStatus: json['enrollment_status']['name'],
-      sourceHire: json['source_hire']['name'],
-      dateOfJoining: json['date_of_joining'],
-      userProfilePicture: json['user_profile_picture'] != null
-          ? List<UserProfilePicture>.from(json['user_profile_picture']
-              .map((x) => UserProfilePicture.fromJson(x)))
-          : [],
-      workExperience: json['work_experience'] != null
-          ? List<WorkExperience>.from(
-              json['work_experience'].map((x) => WorkExperience.fromJson(x)))
-          : [],
-      education: json['education'] != null
-          ? List<EducationDetails>.from(
-              json['education'].map((x) => EducationDetails.fromJson(x)))
-          : [],
     );
   }
 }
@@ -298,8 +231,8 @@ class EmployeeListItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Log profile picture URLs for debugging
-    print(
-        'Profile Picture URLs: ${employee.userProfilePicture.map((p) => p.profilePicture).toList()}');
+    // print(
+    //     'Profile Picture URLs: ${employee.userProfilePicture.map((p) => p.profilePicture).toList()}');
 
     // Base URL of your server
     // final baseUrl = '${URLConstants.baseUrl}';
@@ -322,10 +255,17 @@ class EmployeeListItemCard extends StatelessWidget {
           ),
         );
       },
-      child: Card(
-        elevation: 1,
+      child: Container(
+        // elevation: 1,
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.withOpacity(0.4)),
+          borderRadius: BorderRadius.circular(7.0),
+        ),
         margin: const EdgeInsets.symmetric(vertical: 5),
         child: SizedBox(
+          // decoration: BoxDecoration(
+          //   border: Border.all(color: Colors.grey.withOpacity(0.2)),
+          // ),
           child: Row(
             children: [
               SizedBox(

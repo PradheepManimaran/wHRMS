@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:logger/logger.dart';
+
 import 'package:wHRMS/ThemeColor/theme.dart';
 import 'package:wHRMS/apiHandlar/baseUrl.dart';
 import 'package:page_transition/page_transition.dart';
@@ -24,22 +26,35 @@ class RoleScreen extends StatefulWidget {
 }
 
 class _RoleScreenState extends State<RoleScreen> {
-  final Logger _logger = Logger();
+  // final Logger _logger = Logger();
 
   final List<Role> roleside = [];
   TextEditingController nameController = TextEditingController();
   List<String> roleData = [];
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
 
+    // _initAuthToken();
+
     _initAuthToken();
   }
 
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
   Future<void> _initAuthToken() async {
-    String token = await getAuthToken() as String;
-    _fetchRole(token);
+    // String token = await getAuthToken() as String;
+    _fetchRole();
+
+    _timer ??= Timer.periodic(const Duration(seconds: 1), (timer) {
+      _fetchRole();
+    });
   }
 
   Future<String?> getAuthToken() async {
@@ -47,10 +62,12 @@ class _RoleScreenState extends State<RoleScreen> {
     return prefs.getString('token');
   }
 
-  Future<void> _fetchRole(String token) async {
+  Future<void> _fetchRole() async {
     const String roleApiUrl = '${URLConstants.baseUrl}/api/role';
 
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String token = prefs.getString('token') ?? '';
       final response = await http.get(
         Uri.parse(roleApiUrl),
         headers: {
@@ -60,9 +77,9 @@ class _RoleScreenState extends State<RoleScreen> {
       );
 
       if (response.statusCode == 200) {
-        _logger.d('Roles Status Code : ${response.statusCode}');
-        _logger.d('Roles fetched successfully');
-        _logger.d('Roles response Body: ${response.body}');
+        // _logger.d('Roles Status Code : ${response.statusCode}');
+        // _logger.d('Roles fetched successfully');
+        // _logger.d('Roles response Body: ${response.body}');
 
         final dynamic enrollData = json.decode(response.body);
 
@@ -76,13 +93,21 @@ class _RoleScreenState extends State<RoleScreen> {
             roleside.addAll(rolesList);
           });
         } else {
-          print('Invalid Roles data format: $enrollData');
+          // if (kDebugMode) {
+          //   print('Invalid Roles data format: $enrollData');
+          // }
           _showSnackBar('Invalid Roles data format');
         }
       } else {
-        print('Error fetching Roles. Status code: ${response.statusCode}');
-        print('Roles Response body: ${response.body}');
-        print('Token : $token');
+        // if (kDebugMode) {
+        //   print('Error fetching Roles. Status code: ${response.statusCode}');
+        // }
+        // if (kDebugMode) {
+        //   print('Roles Response body: ${response.body}');
+        // }
+        // if (kDebugMode) {
+        //   print('Token : $token');
+        // }
       }
     } catch (e) {
       _handleError(e);
@@ -96,7 +121,9 @@ class _RoleScreenState extends State<RoleScreen> {
       String? token = await getAuthToken();
 
       if (token == null) {
-        print('Token not found in shared preferences');
+        // if (kDebugMode) {
+        //   print('Token not found in shared preferences');
+        // }
         return;
       }
       final name = nameController.text;
@@ -112,8 +139,8 @@ class _RoleScreenState extends State<RoleScreen> {
       );
 
       if (response.statusCode == 201) {
-        _logger.d('Roles Status Code : ${response.statusCode}');
-        _logger.d('Roles fetched successfully');
+        // _logger.d('Roles Status Code : ${response.statusCode}');
+        // _logger.d('Roles fetched successfully');
 
         // Parse the response body as a Map
         final Map<String, dynamic> responseBody = json.decode(response.body);
@@ -133,27 +160,57 @@ class _RoleScreenState extends State<RoleScreen> {
             nameController.addAll(nameController);
           });
         }
-      } else {
-        // Handle HTTP errors 400, 401, 500
-        String errorMessage;
-        if (response.statusCode == 401) {
-          errorMessage = 'Unauthorized. Please login again.';
-        } else if (response.statusCode == 400) {
-          errorMessage = 'Bad request. Please check your request data.';
-        } else if (response.statusCode == 500) {
-          errorMessage = 'Server error. Please try again later.';
-        } else {
-          errorMessage =
-              'Error fetching Roles. Status code: ${response.statusCode}';
-        }
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            duration: Duration(seconds: 3), // Adjust the duration as needed
+          const SnackBar(
+            backgroundColor: Colors.green,
+            content: Text('Role add Successfully'),
+            duration: Duration(seconds: 2),
           ),
         );
-        print('Post Error fetching Roles. Status code: ${response.statusCode}');
-        print('Post Roles Response body: ${response.body}');
+      } else {
+        // Handle HTTP errors 400, 401, 500
+
+        if (response.statusCode == 401) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              backgroundColor: Colors.red,
+              content: Text('Invalid Token'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        } else if (response.statusCode == 400) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              backgroundColor: Colors.red,
+              content: Text('Bad Request'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        } else if (response.statusCode == 500) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              backgroundColor: Colors.red,
+              content: Text('Internal Server Error'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        } else {
+          //   ScaffoldMessenger.of(context).showSnackBar(
+          //   const SnackBar(
+          //     backgroundColor: Colors.green,
+          //     content: Text('Error fetching Roles. Status code: ${response.statusCode}'),
+          //     duration: Duration(seconds: 2),
+          //   ),
+          // );
+        }
+
+        // if (kDebugMode) {
+        //   print(
+        //       'Post Error fetching Roles. Status code: ${response.statusCode}');
+        // }
+        // if (kDebugMode) {
+        //   print('Post Roles Response body: ${response.body}');
+        // }
       }
     } catch (e) {
       _handleError(e);
@@ -161,8 +218,10 @@ class _RoleScreenState extends State<RoleScreen> {
   }
 
   void _handleError(dynamic e) {
-    _logger.e('Error: $e');
-    print('Error: $e');
+    // _logger.e('Error: $e');
+    // if (kDebugMode) {
+    //   print('Error: $e');
+    // }
     if (e is SocketException) {
       _showSnackBar('No Internet Connection');
     }

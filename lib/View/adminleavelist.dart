@@ -2,13 +2,11 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:logger/logger.dart';
 import 'package:wHRMS/ThemeColor/theme.dart';
 import 'package:wHRMS/View/home_screen.dart';
 import 'package:wHRMS/apiHandlar/baseUrl.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shimmer/shimmer.dart';
 
 class AdminLeaveListScreen extends StatefulWidget {
   const AdminLeaveListScreen({super.key});
@@ -21,7 +19,7 @@ class _AdminLeaveListScreenState extends State<AdminLeaveListScreen> {
   List<Employees> employee = [];
   List<ImageEmployee> image = [];
 
-  final Logger _logger = Logger();
+  // final Logger _logger = Logger();
   bool isLoading = true;
 
   @override
@@ -50,7 +48,7 @@ class _AdminLeaveListScreenState extends State<AdminLeaveListScreen> {
         },
       );
 
-      _logger.d('Testing Response Body: ${response.body}');
+      // _logger.d('Testing Response Body: ${response.body}');
       if (response.statusCode == 200) {
         final List<dynamic> jsonData = jsonDecode(response.body);
         List<ImageEmployee> fetchedEmployees = [];
@@ -62,13 +60,19 @@ class _AdminLeaveListScreenState extends State<AdminLeaveListScreen> {
           isLoading = false;
         });
       } else {
-        print(
-            'Failed to load employee data. Status code: ${response.statusCode}');
-        print('Response body: ${response.body}');
-        _logger.d('Error Response Body: ${response.body}');
+        //   if (kDebugMode) {
+        //     print(
+        //         'Failed to load employee data. Status code: ${response.statusCode}');
+        //   }
+        //   if (kDebugMode) {
+        //     print('Response body: ${response.body}');
+        //   }
+        //   _logger.d('Error Response Body: ${response.body}');
       }
     } catch (e) {
-      print('Error loading employee data: $e');
+      // if (kDebugMode) {
+      //   print('Error loading employee data: $e');
+      // }
     }
   }
 
@@ -93,20 +97,34 @@ class _AdminLeaveListScreenState extends State<AdminLeaveListScreen> {
           setState(() {
             List<Employees> fetchedEmployees = [];
             for (var item in data) {
-              fetchedEmployees.add(Employees.fromJson(item));
+              Employees leave = Employees.fromJson(item);
+              // Parse the date strings to DateTime objects
+              DateTime endDate = DateTime.parse(leave.endDate);
+              // Check if the leave date is after the current date
+              if (endDate.isAfter(DateTime.now())) {
+                fetchedEmployees.add(leave);
+              }
             }
             employee = fetchedEmployees;
             isLoading = false;
           });
         }
-        print('Leave Response body: ${response.body}');
+        // if (kDebugMode) {
+        //   print('Leave Response body: ${response.body}');
+        // }
       } else {
-        print(
-            'Failed to load employee data. Status code: ${response.statusCode}');
-        print('Response body: ${response.body}');
+        // if (kDebugMode) {
+        //   print(
+        //       'Failed to load employee data. Status code: ${response.statusCode}');
+        // }
+        // if (kDebugMode) {
+        //   print('Response body: ${response.body}');
+        // }
       }
     } catch (e) {
-      print('Error loading employee data: $e');
+      // if (kDebugMode) {
+      //   print('Error loading employee data: $e');
+      // }
     }
   }
 
@@ -131,12 +149,24 @@ class _AdminLeaveListScreenState extends State<AdminLeaveListScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 15),
+                SizedBox(height: 15),
               ],
             ),
             const SizedBox(height: 10),
             isLoading
-                ? _buildShimmerLoading()
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(height: 10.0),
+                      _buildShimmerLoading(),
+                      _buildShimmerLoading(),
+                      _buildShimmerLoading(),
+                      _buildShimmerLoading(),
+                      _buildShimmerLoading(),
+                      _buildShimmerLoading(),
+                    ],
+                  )
                 : Center(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -160,59 +190,47 @@ class _AdminLeaveListScreenState extends State<AdminLeaveListScreen> {
   }
 
   Widget _buildShimmerLoading() {
-    return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
-      period: Duration(seconds: 30),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            height: 120,
-            child: Card(
-              elevation: 1,
-              margin: const EdgeInsets.symmetric(vertical: 5),
-              child: Row(
-                children: [
-                  const SizedBox(
-                    width: 120,
-                    child: CircleAvatar(
-                      backgroundColor: Colors.blue,
-                      radius: 40,
-                    ),
-                  ),
-                  Expanded(
-                    child: ListTile(
-                      title: Container(
-                        color: Colors.white,
-                        height: 16,
-                      ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            color: Colors.white,
-                            height: 16,
-                          ),
-                          Container(
-                            color: Colors.white,
-                            height: 16,
-                          ),
-                          Container(
-                            color: Colors.white,
-                            height: 16,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+    return SizedBox(
+      height: 120,
+      child: Card(
+        elevation: 1,
+        // margin: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 120,
+              child: CircleAvatar(
+                backgroundColor: Colors.grey[300]!,
+                radius: 40,
               ),
             ),
-          ),
-          // Add more shimmer loading widgets as needed
-        ],
+            Expanded(
+              child: ListTile(
+                title: Container(
+                  color: Colors.white,
+                  height: 16,
+                ),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      color: Colors.white,
+                      height: 16,
+                    ),
+                    Container(
+                      color: Colors.white,
+                      height: 14,
+                    ),
+                    Container(
+                      color: Colors.white,
+                      height: 14,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -295,6 +313,7 @@ class EmployeeListItemCard extends StatefulWidget {
   final ImageEmployee image;
 
   const EmployeeListItemCard({
+    super.key,
     required this.employee,
     required this.image,
   });
@@ -328,6 +347,7 @@ class _EmployeeListItemCardState extends State<EmployeeListItemCard> {
       );
 
       Navigator.pushReplacement(
+        // ignore: use_build_context_synchronously
         context,
         MaterialPageRoute(
           builder: (context) => const HomeScreen(),
@@ -335,7 +355,10 @@ class _EmployeeListItemCardState extends State<EmployeeListItemCard> {
       );
 
       if (response.statusCode == 200) {
-        print('Leave status updated successfully');
+        // if (kDebugMode) {
+        //   print('Leave status updated successfully');
+        // }
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             backgroundColor: Colors.green,
@@ -344,16 +367,33 @@ class _EmployeeListItemCardState extends State<EmployeeListItemCard> {
           ),
         );
         setState(() {});
-        print('Response body: ${response.body}');
-      } else {
-        print(
-            'Failed to update leave status. Status code: ${response.statusCode}');
-        print('Response body: ${response.body}');
-        print('Table ID: $tableId');
-        print('Reaject Reason: $rejectionReason');
+        // if (kDebugMode) {
+        //   print('Response body: ${response.body}');
+        // }
+      } else if (response.statusCode == 400) {
+        // if (kDebugMode) {
+        //   print(
+        //       'Failed to update leave status. Status code: ${response.statusCode}');
+        // }
+        // if (kDebugMode) {
+        //   print('Error Response body: ${response.body}');
+        // }
+
+        // if (kDebugMode) {
+        //   print('Reaject Reason: $rejectionReason');
+        // }
+      } else if (response.statusCode == 500) {
+        // if (kDebugMode) {
+        //   print('Status Code: ${response.statusCode}');
+        // }
+        // if (kDebugMode) {
+        //   print('Error Response Body: ${response.body}');
+        // }
       }
     } catch (e) {
-      print('Error updating leave status: $e');
+      // if (kDebugMode) {
+      //   print('Error updating leave status: $e');
+      // }
     }
   }
 
@@ -365,22 +405,24 @@ class _EmployeeListItemCardState extends State<EmployeeListItemCard> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Enter Rejection Reason'),
+          title: const Text('Enter Rejection Reason'),
           content: TextField(
             onChanged: (value) {
               rejectionReason =
                   value; // Update the rejection reason as the user types
             },
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               hintText: 'Enter reason...',
             ),
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Submit'),
+              child: const Text('Submit'),
               onPressed: () {
                 if (rejectionReason.isNotEmpty) {
-                  print('Rejection Reason: $rejectionReason'); // Debugging
+                  // if (kDebugMode) {
+                  //   print('Rejection Reason: $rejectionReason');
+                  // } // Debugging
                   Navigator.of(context).pop(); // Close the dialog
                   _updateLeaveStatus(false, tableId,
                       rejectionReason); // Call method to update leave status with rejection reason
@@ -403,8 +445,8 @@ class _EmployeeListItemCardState extends State<EmployeeListItemCard> {
 
   @override
   Widget build(BuildContext context) {
-    print('Testing User ID: ${widget.employee.userID}');
-    print('Testing Table ID: ${widget.employee.tableId}');
+    // print('Testing User ID: ${widget.employee.userID}');
+    // print('Testing Table ID: ${widget.employee.tableId}');
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -412,14 +454,16 @@ class _EmployeeListItemCardState extends State<EmployeeListItemCard> {
           PageTransition(
             type: PageTransitionType.rightToLeft,
             duration: const Duration(milliseconds: 200),
-            child: Column(
+            child: const Column(
                 //
                 ),
           ),
         );
       },
-      child: Card(
-        elevation: 1,
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.withOpacity(0.4)),
+        ),
         margin: const EdgeInsets.symmetric(vertical: 5),
         child: Column(
           children: [

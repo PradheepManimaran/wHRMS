@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
 import 'package:wHRMS/ThemeColor/theme.dart';
 import 'package:wHRMS/View/home_screen.dart';
 import 'package:wHRMS/apiHandlar/baseUrl.dart';
@@ -21,7 +20,7 @@ class _FamilyScreenState extends State<FamilyScreen> {
   TextEditingController phoneController = TextEditingController();
   TextEditingController addressController = TextEditingController();
 
-  final Logger _logger = Logger();
+  // final Logger _logger = Logger();
 
   Future<String?> getAuthToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -52,9 +51,9 @@ class _FamilyScreenState extends State<FamilyScreen> {
           'address': address,
         }),
       );
-      _logger.d('Testing StatusCode: ${response.statusCode}');
-      _logger.d('Testing StatusCode: ${response.body}');
-      _logger.d('Test ');
+      // _logger.d('Testing StatusCode: ${response.statusCode}');
+      // _logger.d('Testing StatusCode: ${response.body}');
+      // _logger.d('Test ');
 
       // Check if form is not valid, return
       // if (!_formKey.currentState!.validate()) {
@@ -62,8 +61,8 @@ class _FamilyScreenState extends State<FamilyScreen> {
       // }
 
       if (response.statusCode == 201 || response.statusCode == 200) {
-        final employeeData = json.decode(response.body);
-        _logger.d('Family Information add successfully: $employeeData');
+        // final employeeData = json.decode(response.body);
+        // _logger.d('Family Information add successfully: $employeeData');
 
         // Fetch dropdown data again after successful creation
         // _fetchDropdownData();
@@ -82,7 +81,7 @@ class _FamilyScreenState extends State<FamilyScreen> {
           ),
         );
       } else if (response.statusCode == 400) {
-        print('Response body: ${response.body}');
+        // print('Response body: ${response.body}');
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -90,7 +89,7 @@ class _FamilyScreenState extends State<FamilyScreen> {
             content: Text('Bad Request: Error Creating Family.'),
           ),
         );
-        print('Response Body: ${response.body}');
+        // print('Response Body: ${response.body}');
       } else if (response.statusCode == 401) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -119,8 +118,8 @@ class _FamilyScreenState extends State<FamilyScreen> {
   }
 
   void _handleError(dynamic e) {
-    _logger.e('Error: $e');
-    print('Error: $e');
+    // _logger.e('Error: $e');
+    // print('Error: $e');
     if (e is SocketException) {
       _showSnackBar('No Internet Connection');
     }
@@ -171,28 +170,28 @@ class _FamilyScreenState extends State<FamilyScreen> {
             _buildTextField(
               controller: relationshipController,
               hintText: 'Relationship',
-              prefixIconData: Icons.person,
+              prefixIconData: Icons.account_box,
               fieldName: 'Relationship',
             ),
             const SizedBox(height: 15),
             _buildTextField(
               controller: phoneController,
               hintText: 'PhoneNumber',
-              prefixIconData: Icons.person,
+              prefixIconData: Icons.phone_android_sharp,
               fieldName: 'PhoneNumber',
             ),
             const SizedBox(height: 15),
             _buildTextField(
               controller: addressController,
               hintText: 'Address',
-              prefixIconData: Icons.person,
+              prefixIconData: Icons.location_on_outlined,
               fieldName: 'Address',
             ),
             const SizedBox(height: 15),
             Align(
               alignment: Alignment.center,
               child: SizedBox(
-                width: 340.0,
+                width: double.infinity,
                 height: 60.0,
                 child: ElevatedButton(
                   onPressed: () => fetchfamily(),
@@ -200,8 +199,7 @@ class _FamilyScreenState extends State<FamilyScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(5.0),
                     ),
-                    backgroundColor:
-                        ThemeColor.app_bar, // Replace with your app's color
+                    backgroundColor: ThemeColor.app_bar,
                   ),
                   child: const Text(
                     'CREATE',

@@ -12,8 +12,8 @@ class PersonalEditScreen extends StatefulWidget {
 }
 
 class _PersonalEditScreenState extends State<PersonalEditScreen> {
-  TextEditingController usernameController = TextEditingController();
-
+  TextEditingController firstnameController = TextEditingController();
+  TextEditingController lastnameController = TextEditingController();
   TextEditingController dateOfBirthController = TextEditingController();
   TextEditingController ageController = TextEditingController();
   TextEditingController aboutMeController = TextEditingController();
@@ -24,21 +24,11 @@ class _PersonalEditScreenState extends State<PersonalEditScreen> {
   int currentSection = 1;
   bool isLastSection = false;
 
-  bool isSameAsPresentAddress = false;
-  bool isFresher = false;
-
-  bool isAdditionalFieldsAdded = false;
-  bool isAdditionalFieldsWork = false;
-
-  String? selectedRole;
-  String? selectedStatus;
-  final List<String> genderOptions = ['Male', 'Female'];
-  final List<String> statusOptions = ['Single', 'Married'];
-
   @override
   void initState() {
     super.initState();
     _loadIdentityData();
+    // _companyData();
   }
 
   Future<void> _loadIdentityData() async {
@@ -56,11 +46,13 @@ class _PersonalEditScreenState extends State<PersonalEditScreen> {
       if (personalData != null && personalData.isNotEmpty) {
         setState(() {
           Map<String, dynamic> latestPersonalData = personalData.last;
+          firstnameController.text = latestPersonalData['first_name'] ?? '';
+          lastnameController.text = latestPersonalData['last_name'] ?? '';
           int? age = latestPersonalData['age'];
           ageController.text = age != null ? age.toString() : '';
           dateOfBirthController.text =
               latestPersonalData['date_of_birth'] ?? '';
-          emaiController.text = latestPersonalData['personal_email'] ?? '';
+
           aboutMeController.text = latestPersonalData['about_us'] ?? '';
         });
       }
@@ -132,9 +124,10 @@ class _PersonalEditScreenState extends State<PersonalEditScreen> {
   void _nextSection() async {
     try {
       Map<String, dynamic> personalInformationData = {
-        // 'age': ageController.text,
+        'first_name': firstnameController.text,
+        'last_name': lastnameController.text,
+        'age': ageController.text,
         'date_of_birth': dateOfBirthController.text,
-        'personal_email': emaiController.text,
         'about_us': aboutMeController.text,
       };
 
@@ -170,12 +163,17 @@ class _PersonalEditScreenState extends State<PersonalEditScreen> {
             textAlign: TextAlign.start,
           ),
         ),
-        // const SizedBox(height: 15),
-        // _buildTextField(
-        //   hintText: 'User Name',
-        //   prefixIconData: Icons.person,
-        //   controller: ageController,
-        // ),
+        _buildTextField(
+          hintText: 'First Name',
+          prefixIconData: Icons.person,
+          controller: firstnameController,
+        ),
+        const SizedBox(height: 15),
+        _buildTextField(
+          hintText: 'Last Name',
+          prefixIconData: Icons.person,
+          controller: lastnameController,
+        ),
         const SizedBox(height: 15),
         _buildTextField(
           hintText: 'age',
@@ -183,49 +181,11 @@ class _PersonalEditScreenState extends State<PersonalEditScreen> {
           controller: ageController,
         ),
         const SizedBox(height: 15),
-        // _buildDropdownFormField(
-        //   items: genderOptions,
-        //   selectedValue: selectedRole,
-        //   hintText: 'Gender',
-        //   onChanged: (String? value) {
-        //     setState(() {
-        //       selectedRole = value;
-        //     });
-        //   },
-        //   prefixIconData: Icons.person,
-        // ),
-        // const SizedBox(height: 15),
         _buildDateField(
           'Date Of Birth',
           dateOfBirthController,
           ageController,
         ),
-        // const SizedBox(height: 15),
-        // _buildTextField(
-        //   hintText: 'Age',
-        //   prefixIconData: Icons.person,
-        //   controller: ageController,
-        // ),
-        // const SizedBox(height: 15),
-        // _buildDropdownFormField(
-        //   items: statusOptions,
-        //   selectedValue: selectedStatus,
-        //   hintText: 'Marital Status',
-        //   onChanged: (String? value) {
-        //     setState(() {
-        //       selectedStatus = value;
-        //     });
-        //   },
-        //   prefixIconData: Icons.person,
-        // ),
-        const SizedBox(height: 15),
-        _buildTextField(
-          hintText: 'Email',
-          prefixIconData: Icons.person,
-          controller: emaiController,
-        ),
-        const SizedBox(height: 15),
-        // _buildLeaveReasonField(),
       ],
     );
   }
@@ -241,6 +201,12 @@ class _PersonalEditScreenState extends State<PersonalEditScreen> {
         decoration: InputDecoration(
           hintText: hintText,
           prefixIcon: Icon(prefixIconData),
+          enabledBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.grey),
+          ),
+          focusedBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.grey),
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(6),
             borderSide: const BorderSide(
@@ -264,6 +230,12 @@ class _PersonalEditScreenState extends State<PersonalEditScreen> {
         decoration: InputDecoration(
           prefixIcon: const Icon(
             Icons.date_range,
+          ),
+          enabledBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.grey),
+          ),
+          focusedBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.grey),
           ),
           hintText: hintText,
           labelStyle: const TextStyle(fontSize: 10),
@@ -297,87 +269,6 @@ class _PersonalEditScreenState extends State<PersonalEditScreen> {
             ageController.text = age.toString();
           }
         },
-      ),
-    );
-  }
-
-  Widget _buildLeaveReasonField() {
-    return SizedBox(
-      width: double.infinity,
-      child: TextField(
-        controller: aboutMeController,
-        maxLines: null,
-        decoration: InputDecoration(
-          prefix: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4.0),
-            child: SizedBox(
-              width: 5,
-              child: Container(
-                color: Colors.black,
-              ),
-            ),
-          ),
-          hintText: 'About Me',
-          hintStyle: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.bold,
-          ),
-          border: const OutlineInputBorder(),
-          filled: true,
-          fillColor: ThemeColor.TextFieldColor,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDropdownFormField({
-    required List<String> items,
-    required String? selectedValue,
-    required String hintText,
-    required void Function(String?) onChanged,
-    IconData? prefixIconData,
-  }) {
-    return SizedBox(
-      child: DropdownButtonFormField<String>(
-        decoration: InputDecoration(
-          hintText: hintText,
-          filled: true,
-          fillColor: ThemeColor.TextFieldColor,
-          enabledBorder: OutlineInputBorder(
-            borderSide: const BorderSide(
-              color: Colors.grey,
-              width: 1.0,
-            ),
-            borderRadius: BorderRadius.circular(5.0),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: const BorderSide(
-              color: Colors.grey,
-              width: 1.0,
-            ),
-            borderRadius: BorderRadius.circular(5.0),
-          ),
-          border: OutlineInputBorder(
-            borderSide: BorderSide.none,
-            borderRadius: BorderRadius.circular(5.0),
-          ),
-          prefixIcon: Icon(prefixIconData),
-        ),
-        value: selectedValue,
-        items: items.map((String item) {
-          return DropdownMenuItem<String>(
-            value: item,
-            child: Text(
-              item,
-              style: const TextStyle(
-                color: Colors.black,
-              ),
-            ),
-          );
-        }).toList(),
-        dropdownColor: ThemeColor.log_background,
-        onChanged: onChanged,
-        style: const TextStyle(),
       ),
     );
   }

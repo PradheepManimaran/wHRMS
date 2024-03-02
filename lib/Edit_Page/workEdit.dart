@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:logger/logger.dart';
+
 import 'package:wHRMS/ThemeColor/theme.dart';
 import 'package:wHRMS/apiHandlar/editApi.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,10 +22,12 @@ class _WorkEditScreenState extends State<WorkExperienceEditScreen> {
   TextEditingController companynameController = TextEditingController();
   TextEditingController jobtitleController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
+  TextEditingController personNameController = TextEditingController();
+  TextEditingController personContactController = TextEditingController();
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final Logger _logger = Logger();
-
+  // final Logger _logger = Logger();
+  String? selectRelevant;
   int currentSection = 1;
   bool isLastSection = false;
 
@@ -50,12 +52,20 @@ class _WorkEditScreenState extends State<WorkExperienceEditScreen> {
     fromDateController.text = widget.workExperienceData['from_date'] ?? '';
     toDateController.text = widget.workExperienceData['to_date'] ?? '';
     descriptionController.text = widget.workExperienceData['description'] ?? '';
+    bool selectRelevant = widget.workExperienceData['relavent'] ?? false;
+    personNameController.text =
+        widget.workExperienceData['verify_person_name'] ?? '';
+    personContactController.text =
+        widget.workExperienceData['verify_person_contact'] ?? '';
 
-    print('Company Name: ${companynameController.text}');
-    print('Job Title: ${jobtitleController.text}');
-    print('From Date: ${fromDateController.text}');
-    print('To Date: ${toDateController.text}');
-    print('Description: ${descriptionController.text}');
+    // print('Company Name: ${companynameController.text}');
+    // print('Job Title: ${jobtitleController.text}');
+    // print('From Date: ${fromDateController.text}');
+    // print('To Date: ${toDateController.text}');
+    // print('Description: ${descriptionController.text}');
+    print('Select Relevant: $selectRelevant');
+    // print('Person Name: ${personContactController.text}');
+    // print('Person Contact: ${personContactController.text}');
   }
 
   @override
@@ -87,7 +97,7 @@ class _WorkEditScreenState extends State<WorkExperienceEditScreen> {
                 Align(
                   alignment: Alignment.bottomCenter,
                   child: SizedBox(
-                    width: 340.0,
+                    width: double.infinity,
                     height: 60.0,
                     child: ElevatedButton(
                       onPressed: () {
@@ -97,12 +107,12 @@ class _WorkEditScreenState extends State<WorkExperienceEditScreen> {
                       },
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6.0),
+                          borderRadius: BorderRadius.circular(1.0),
                         ),
                         backgroundColor: ThemeColor.btn_color,
                       ),
                       child: Text(
-                        isLastSection ? 'Submit' : 'Next',
+                        isLastSection ? 'Submit' : 'Submit',
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -133,22 +143,22 @@ class _WorkEditScreenState extends State<WorkExperienceEditScreen> {
       });
     } else {
       try {
-        print('Profile Details Complete');
+        // print('Profile Details Complete');
 
         // Retrieve the token from SharedPreferences
         String? token = await getAuthToken();
 
         // Check if token is not null before making the API call
         if (token == null) {
-          print('Error: Token is null.');
+          // print('Error: Token is null.');
           return;
         }
 
         // Retrieve the ID of the work experience being edited
         String workExperienceId = widget.workExperienceData['id'].toString();
 
-        print(
-            'Work Experience ID: $workExperienceId'); // Print the workExperienceId
+        // print(
+        //     'Work Experience ID: $workExperienceId'); // Print the workExperienceId
 
         if (!_validateWorkExperienceFields()) {
           // Display an error message using ScaffoldMessenger
@@ -166,9 +176,11 @@ class _WorkEditScreenState extends State<WorkExperienceEditScreen> {
         final toDate = toDateController.text;
         final description = descriptionController.text;
         final relevant = selectedRelevant;
+        final personName = personNameController.text;
+        final personContact = personContactController.text;
         final tableid = workExperienceId;
-        _logger.d(
-            'Testing Id: $tableid,COM NAME: $comname,DEG: $designation,FROM Date: $fromDate,TO Date: $toDate,Job: $description,Selecte: $relevant');
+        // _logger.d(
+        //     'Testing Id: $tableid,COM NAME: $comname,DEG: $designation,FROM Date: $fromDate,TO Date: $toDate,Job: $description,Selecte: $relevant');
         // Call the updateWorkData method from the class UpdateWorkApi
         // ignore: use_build_context_synchronously
         await UpdateWorkApi.updateWorkData({
@@ -178,12 +190,14 @@ class _WorkEditScreenState extends State<WorkExperienceEditScreen> {
           'to_date': toDate,
           'description': description,
           'relavent': relevant,
+          'verify_person_name': personName,
+          'verify_person_contact': personContact,
           'table_id': tableid
         }, context);
 
         // Handle any additional logic or UI updates after the update
       } catch (e) {
-        print('Error in _nextSection: $e');
+        // print('Error in _nextSection: $e');
       }
     }
   }
@@ -197,8 +211,7 @@ class _WorkEditScreenState extends State<WorkExperienceEditScreen> {
           jobtitleController.text.isEmpty ||
           fromDateController.text.isEmpty ||
           toDateController.text.isEmpty ||
-          descriptionController.text.isEmpty ||
-          selectedRelevant == null) {
+          descriptionController.text.isEmpty) {
         return false;
       }
     }
@@ -221,7 +234,7 @@ class _WorkEditScreenState extends State<WorkExperienceEditScreen> {
       children: [
         const SizedBox(height: 15),
         const Text(
-          'Wor Experience',
+          'Work Experience',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 16,
@@ -254,14 +267,29 @@ class _WorkEditScreenState extends State<WorkExperienceEditScreen> {
         ),
         const SizedBox(height: 15),
         buildDropdownFormFieldss(
-          items: relevant, // Pass the relevant list
+          items: relevant,
           selectedValue: selectedRelevant,
           hintText: 'Select relevant',
           onChanged: (value) {
-            // Ensure the selected value is parsed into an integer before assigning
-            selectedRelevant = value;
+            setState(() {
+              selectedRelevant = value;
+            });
           },
           prefixIconData: Icons.check,
+        ),
+        const SizedBox(height: 15),
+        _buildTextField(
+          hintText: 'Person Name',
+          prefixIconData: Icons.business,
+          controller: personNameController,
+          fieldName: 'Person Name',
+        ),
+        const SizedBox(height: 15),
+        _buildTextField(
+          hintText: 'Person Contact',
+          prefixIconData: Icons.business,
+          controller: personContactController,
+          fieldName: 'Person Contact',
         ),
       ],
     );
@@ -291,7 +319,7 @@ class _WorkEditScreenState extends State<WorkExperienceEditScreen> {
             borderRadius: BorderRadius.circular(6),
             borderSide: const BorderSide(
               color: Colors.black,
-              width: 2.0,
+              width: 1.0,
             ),
           ),
           filled: true,
@@ -319,12 +347,18 @@ class _WorkEditScreenState extends State<WorkExperienceEditScreen> {
       items: items.map((bool value) {
         return DropdownMenuItem<bool>(
           value: value,
-          child: Text(value ? 'true' : 'false'),
+          child: Text(value ? 'True' : 'False'),
         );
       }).toList(),
       onChanged: onChanged,
       decoration: InputDecoration(
         hintText: hintText,
+        enabledBorder: const OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.grey),
+        ),
+        focusedBorder: const OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.grey),
+        ),
         prefixIcon: Icon(prefixIconData),
         border: OutlineInputBorder(),
       ),

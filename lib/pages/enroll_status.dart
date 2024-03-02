@@ -1,9 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:logger/logger.dart';
 import 'package:http/http.dart' as http;
 import 'package:wHRMS/ThemeColor/theme.dart';
 import 'package:wHRMS/apiHandlar/baseUrl.dart';
@@ -25,11 +24,12 @@ class EnrollStatus {
 }
 
 class _EnrollStatusScreenState extends State<EnrollStatusScreen> {
-  final Logger _logger = Logger();
+  // final Logger _logger = Logger();
 
   final List<EnrollStatus> enrollStatus = [];
   TextEditingController nameController = TextEditingController();
   List<String> enrollStatusData = [];
+  Timer? _timer;
 
   @override
   void initState() {
@@ -38,9 +38,19 @@ class _EnrollStatusScreenState extends State<EnrollStatusScreen> {
     _initAuthToken();
   }
 
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
   Future<void> _initAuthToken() async {
-    String token = await getAuthToken() as String;
-    _fetchEnrollStatus(token);
+    // String token = await getAuthToken() as String;
+    _fetchEnrollStatus();
+
+    _timer ??= Timer.periodic(const Duration(seconds: 1), (timer) {
+      _fetchEnrollStatus();
+    });
   }
 
   Future<String?> getAuthToken() async {
@@ -48,10 +58,12 @@ class _EnrollStatusScreenState extends State<EnrollStatusScreen> {
     return prefs.getString('token');
   }
 
-  Future<void> _fetchEnrollStatus(String token) async {
+  Future<void> _fetchEnrollStatus() async {
     const String roleApiUrl = '${URLConstants.baseUrl}/api/enrollment_status';
 
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String token = prefs.getString('token') ?? '';
       final response = await http.get(
         Uri.parse(roleApiUrl),
         headers: {
@@ -61,9 +73,9 @@ class _EnrollStatusScreenState extends State<EnrollStatusScreen> {
       );
 
       if (response.statusCode == 200) {
-        _logger.d('EnrollStatus Status Code : ${response.statusCode}');
-        _logger.d('EnrollStatus fetched successfully');
-        _logger.d('EnrollStatus response Body: ${response.body}');
+        // _logger.d('EnrollStatus Status Code : ${response.statusCode}');
+        // _logger.d('EnrollStatus fetched successfully');
+        // _logger.d('EnrollStatus response Body: ${response.body}');
 
         final dynamic enrollData = json.decode(response.body);
 
@@ -78,14 +90,14 @@ class _EnrollStatusScreenState extends State<EnrollStatusScreen> {
             enrollStatus.addAll(statusList);
           });
         } else {
-          print('Invalid EnrollStatus data format: $enrollData');
+          // print('Invalid EnrollStatus data format: $enrollData');
           _showSnackBar('Invalid EnrollStatus data format');
         }
       } else {
-        print(
-            'Error fetching EnrollStatus. Status code: ${response.statusCode}');
-        print('EnrollStatus Response body: ${response.body}');
-        print('Token : $token');
+        // print(
+        //     'Error fetching EnrollStatus. Status code: ${response.statusCode}');
+        // print('EnrollStatus Response body: ${response.body}');
+        // print('Token : $token');
       }
     } catch (e) {
       _handleError(e);
@@ -99,7 +111,7 @@ class _EnrollStatusScreenState extends State<EnrollStatusScreen> {
       String? token = await getAuthToken();
 
       if (token == null) {
-        print('Token not found in shared preferences');
+        // print('Token not found in shared preferences');
         return;
       }
       final name = nameController.text;
@@ -115,8 +127,8 @@ class _EnrollStatusScreenState extends State<EnrollStatusScreen> {
       );
 
       if (response.statusCode == 201) {
-        _logger.d('EnrollStatus Status Code : ${response.statusCode}');
-        _logger.d('EnrollStatus fetched successfully');
+        // _logger.d('EnrollStatus Status Code : ${response.statusCode}');
+        // _logger.d('EnrollStatus fetched successfully');
 
         // Parse the response body as a Map
         final Map<String, dynamic> responseBody = json.decode(response.body);
@@ -136,10 +148,32 @@ class _EnrollStatusScreenState extends State<EnrollStatusScreen> {
             nameController.addAll(nameController);
           });
         }
-      } else {
-        print(
-            'Post Error fetching EnrollStatus. Status code: ${response.statusCode}');
-        print('Post EnrollStatus Response body: ${response.body}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.green,
+            content: Text('Enrollment status add Successfuly'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      } else if (response.statusCode == 400) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.red,
+            content: Text('Bad Request'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        // print(
+        //     'Post Error fetching EnrollStatus. Status code: ${response.statusCode}');
+        // print('Post EnrollStatus Response body: ${response.body}');
+      } else if (response.statusCode == 500) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.red,
+            content: Text('Internal Server Error'),
+            duration: Duration(seconds: 2),
+          ),
+        );
       }
     } catch (e) {
       _handleError(e);
@@ -147,8 +181,8 @@ class _EnrollStatusScreenState extends State<EnrollStatusScreen> {
   }
 
   void _handleError(dynamic e) {
-    _logger.e('Error: $e');
-    print('Error: $e');
+    // _logger.e('Error: $e');
+    // print('Error: $e');
     if (e is SocketException) {
       _showSnackBar('No Internet Connection');
     }
@@ -173,7 +207,7 @@ class _EnrollStatusScreenState extends State<EnrollStatusScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Enroll_Status',
+          'Enroll Status',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,

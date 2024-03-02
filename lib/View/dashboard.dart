@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
@@ -8,6 +7,8 @@ import 'package:wHRMS/apiHandlar/baseUrl.dart';
 import 'package:wHRMS/objects/dash_obj.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:wHRMS/objects/personal.dart';
+import 'package:wHRMS/objects/profile_field.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({Key? key}) : super(key: key);
@@ -20,9 +21,11 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   late DateTime _focusedDay = DateTime.now();
   final CalendarFormat _calendarFormat = CalendarFormat.month;
-
+  // final Logger _logger = Logger();
   DateTime? _selectedDay;
 
+  List<Employe> daage = [];
+  List<EmployeeName> employee = [];
   List<EventData> eventData = [];
 
   String? _newEventTitle;
@@ -34,8 +37,60 @@ class _DashboardState extends State<Dashboard> {
   @override
   void initState() {
     super.initState();
-    // Fetch events when the widget is initialized
+
     _fetchEvents();
+    _fetchEmployeeProfile();
+  }
+
+  Future<void> _fetchEmployeeProfile() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String token = prefs.getString('token') ?? '';
+
+      final response = await http.get(
+        Uri.parse('${URLConstants.baseUrl}/api/employee'),
+        headers: {
+          'Authorization': 'token $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      // _logger.d('Employee Status Code : ${response.statusCode}');
+      // _logger.d('Testing Employee Body : ${response.body}');
+
+      if (response.statusCode == 200) {
+        final dynamic data = jsonDecode(response.body);
+
+        if (data is List) {
+          setState(() {
+            employee = data.map((item) => EmployeeName.fromJson(item)).toList();
+            daage = data.map((item) => Employe.fromJson(item)).toList();
+          });
+        } else if (data is Map<String, dynamic>) {
+          // Single employee case
+          setState(() {
+            employee = [EmployeeName.fromJson(data)];
+            daage = [Employe.fromJson(data)];
+          });
+        } else {
+          // if (kDebugMode) {
+          //   print('Unexpected response format');
+          // }
+        }
+      } else {
+        // if (kDebugMode) {
+        //   print(
+        //       'Failed to load Employee data. Status code: ${response.statusCode}');
+        // }
+        // if (kDebugMode) {
+        //   print('Response body: ${response.body}');
+        // }
+      }
+    } catch (e) {
+      // if (kDebugMode) {
+      //   print('Error loading employee data: $e');
+      // }
+    }
   }
 
   Future<void> _fetchEvents() async {
@@ -55,18 +110,30 @@ class _DashboardState extends State<Dashboard> {
         setState(() {
           eventData = parseEvents(response.body);
         });
-        print('Failed to fetch events. Status code: ${response.statusCode}');
-        print('Failed to fetch events. Body: ${response.body}');
+        // if (kDebugMode) {
+        //   print('Failed to fetch events. Status code: ${response.statusCode}');
+        // }
+        // if (kDebugMode) {
+        //   print('Failed to fetch events. Body: ${response.body}');
+        // }
       } else if (response.statusCode == 400) {
         // Handle the error accordingly
-        print('Failed to fetch events. Status code: ${response.statusCode}');
+        // if (kDebugMode) {
+        //   print('Failed to fetch events. Status code: ${response.statusCode}');
+        // }
       } else if (response.statusCode == 500) {
-        print('Failed to fetch events. Status code: ${response.statusCode}');
-        print('Failed to fetch events. Body: ${response.body}');
+        // if (kDebugMode) {
+        //   print('Failed to fetch events. Status code: ${response.statusCode}');
+        // }
+        // if (kDebugMode) {
+        //   print('Failed to fetch events. Body: ${response.body}');
+        // }
       }
     } catch (e) {
       // Exception occurred
-      print('Exception while fetching events: $e');
+      // if (kDebugMode) {
+      //   print('Exception while fetching events: $e');
+      // }
       // Handle the exception accordingly
     }
   }
@@ -75,16 +142,35 @@ class _DashboardState extends State<Dashboard> {
     // Parse the JSON response and convert it to a list of EventData objects
     List<dynamic> jsonData = jsonDecode(responseBody);
     List<EventData> events = [];
+    DateTime currentDate = DateTime.now();
 
     for (var item in jsonData) {
-      events.add(EventData(
-        title: item['title'],
-        description: item['description'],
-        date: DateTime.parse(item['date']),
-      ));
+      DateTime eventDate = DateTime.parse(item['date']);
+      events.add(
+        EventData(
+          title: item['title'],
+          description: item['description'],
+          date: eventDate,
+        ),
+      );
     }
 
-    return events;
+    // Filter events to include today's and future events
+    List<EventData> filteredEvents = events.where((event) {
+      return event.date.isAfter(currentDate) ||
+          isSameDay(event.date, currentDate);
+    }).toList();
+
+    // Sort events based on their dates
+    filteredEvents.sort((a, b) => a.date.compareTo(b.date));
+
+    return filteredEvents;
+  }
+
+  bool isSameDay(DateTime date1, DateTime date2) {
+    return date1.year == date2.year &&
+        date1.month == date2.month &&
+        date1.day == date2.day;
   }
 
   @override
@@ -97,22 +183,34 @@ class _DashboardState extends State<Dashboard> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'Welcome, Loganathan A',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-              textAlign: TextAlign.left,
+            Row(
+              children: [
+                const Text(
+                  'Welcome,',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+                const SizedBox(width: 5),
+                Text(
+                  employee.isNotEmpty ? employee[0].firstname : '',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                  textAlign: TextAlign.left,
+                ),
+              ],
             ),
             const SizedBox(height: 15),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 _buildCard('Title 1', '55'),
-                const SizedBox(width: 5),
+                // const SizedBox(width: 5),
                 _buildCard('Total Leave', '5 days'),
-                const SizedBox(width: 5),
+                // const SizedBox(width: 5),
                 _buildCard('Title 2', '55'),
               ],
             ),
@@ -141,7 +239,9 @@ class _DashboardState extends State<Dashboard> {
               focusedDay: _focusedDay,
               calendarFormat: _calendarFormat,
               selectedDayPredicate: (day) {
-                return isSameDay(_selectedDay, day);
+                return _selectedDay != null
+                    ? isSameDay(_selectedDay!, day)
+                    : false;
               },
               onDaySelected: (selectedDay, focusedDay) {
                 setState(() {
@@ -300,9 +400,9 @@ class _DashboardState extends State<Dashboard> {
               width: 200,
               decoration: BoxDecoration(
                 color: ThemeColor.card_color,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(7),
               ),
-              child: Center(
+              child: const Center(
                 child: Text(
                   '',
                   style: TextStyle(
@@ -318,46 +418,46 @@ class _DashboardState extends State<Dashboard> {
                 (index) {
                   final event = eventData[index];
                   return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: ThemeColor.card_color,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            const SizedBox(height: 5),
-                            Text(
-                              event.title,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                              ),
-                              textAlign: TextAlign.center,
+                    padding: const EdgeInsets.all(1.0),
+                    // child: Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: ThemeColor.card_color,
+                        borderRadius: BorderRadius.circular(7),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: 5),
+                          Text(
+                            event.title,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
                             ),
-                            Text(
-                              event.description,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                              ),
-                              textAlign: TextAlign.center,
+                            textAlign: TextAlign.center,
+                          ),
+                          Text(
+                            event.description,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
                             ),
-                            const SizedBox(height: 10, width: 10.0),
-                            Text(
-                              'Date: ${DateFormat.yMMMd().format(event.date)}',
-                              style: const TextStyle(
-                                fontSize: 14,
-                              ),
-                              textAlign: TextAlign.center,
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 10, width: 10.0),
+                          Text(
+                            'Date: ${DateFormat.yMMMd().format(event.date)}',
+                            style: const TextStyle(
+                              fontSize: 14,
                             ),
-                            const SizedBox(height: 5),
-                          ],
-                        ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 5),
+                        ],
                       ),
                     ),
+                    // ),
                   );
                 },
               ),
@@ -366,40 +466,43 @@ class _DashboardState extends State<Dashboard> {
   }
 
   Widget _buildCard(String title, String value) {
-    return Expanded(
-      child: Container(
-        margin: const EdgeInsets.all(5),
-        decoration: BoxDecoration(
-          color: ThemeColor.card_color,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Align(
-              alignment: Alignment.center,
-              child: Text(
-                title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            const SizedBox(height: 5),
-            Text(
-              value,
+    // return Expanded(
+    return Container(
+      width: 100,
+      height: 60,
+      // margin: const EdgeInsets.all(5),
+      decoration: BoxDecoration(
+        color: ThemeColor.card_color,
+        borderRadius: BorderRadius.circular(7),
+      ),
+      child: Column(
+        // mainAxisAlignment: MainAxisAlignment.center,
+        // crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const SizedBox(height: 5),
+          Align(
+            alignment: Alignment.center,
+            child: Text(
+              title,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 15,
               ),
               textAlign: TextAlign.center,
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            value,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
+      // ),
     );
   }
 
@@ -409,25 +512,33 @@ class _DashboardState extends State<Dashboard> {
     DateTime? date,
     TimeOfDay time,
   ) async {
-    // Convert TimeOfDay to DateTime
-    DateTime eventDateTime = DateTime(
-      date!.year,
-      date.month,
-      date.day,
-      time.hour,
-      time.minute,
-    );
-
-    // Prepare the request body
-    Map<String, dynamic> requestBody = {
-      "title": title,
-      "date": DateFormat('yyyy-MM-dd').format(eventDateTime),
-      "description": description,
-    };
-
-    // Make the POST request
     try {
+      // Check the user's role here
       SharedPreferences prefs = await SharedPreferences.getInstance();
+      bool isSuperUser = prefs.getBool('is_superuser') ?? false;
+
+      if (!isSuperUser) {
+        // If the user is not a superuser, throw an error indicating they are not authorized to add events
+        throw Exception('Only superusers are authorized to add events.');
+      }
+
+      // Convert TimeOfDay to DateTime
+      DateTime eventDateTime = DateTime(
+        date!.year,
+        date.month,
+        date.day,
+        time.hour,
+        time.minute,
+      );
+
+      // Prepare the request body
+      Map<String, dynamic> requestBody = {
+        "title": title,
+        "date": DateFormat('yyyy-MM-dd').format(eventDateTime),
+        "description": description,
+      };
+
+      // Make the POST request
       String token = prefs.getString('token') ?? '';
 
       final response = await http.post(
@@ -441,7 +552,9 @@ class _DashboardState extends State<Dashboard> {
 
       if (response.statusCode == 201) {
         // Event added successfully
-        print('Event added successfully');
+        // if (kDebugMode) {
+        //   print('Event added successfully');
+        // }
         // Update your local data or UI if necessary
         setState(() {
           eventData.add(
@@ -453,23 +566,45 @@ class _DashboardState extends State<Dashboard> {
             ),
           );
         });
-        print('Successfully add event. Status code: ${response.statusCode}');
-        print('Success Response Body: ${response.body}');
+        // if (kDebugMode) {
+        //   print('Successfully add event. Status code: ${response.statusCode}');
+        // }
+        // if (kDebugMode) {
+        //   print('Success Response Body: ${response.body}');
+        // }
       } else if (response.statusCode == 400) {
         // Error occurred while adding the event
-        print('Failed to add event. Status code: ${response.statusCode}');
-        print('Error Response Body: ${response.body}');
+        // if (kDebugMode) {
+        //   print('Failed to add event. Status code: ${response.statusCode}');
+        // }
+        // if (kDebugMode) {
+        //   print('Error Response Body: ${response.body}');
+        // }
         // Handle the error accordingly
       } else if (response.statusCode == 500) {
         // Error occurred while adding the event
-        print('Failed to add event. Status code: ${response.statusCode}');
-        print('Error Response Body: ${response.body}');
+        // if (kDebugMode) {
+        //   print('Failed to add event. Status code: ${response.statusCode}');
+        // }
+        // if (kDebugMode) {
+        //   print('Error Response Body: ${response.body}');
+        // }
         // Handle the error accordingly
       }
     } catch (e) {
       // Exception occurred
-      print('Exception while adding event: $e');
+      // if (kDebugMode) {
+      //   print('Exception while adding event: $e');
+      // }
       // Handle the exception accordingly
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          content: Text('Error: $e'),
+          duration: const Duration(seconds: 5),
+        ),
+      );
     }
   }
 }

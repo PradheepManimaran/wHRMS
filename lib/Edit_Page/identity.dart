@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wHRMS/CSC/csc_picker.dart';
 
 import 'package:wHRMS/ThemeColor/theme.dart';
 import 'package:wHRMS/apiHandlar/editApi.dart';
@@ -20,6 +21,10 @@ class _IdentityScreenState extends State<IdentityScreen> {
   TextEditingController personalEmailController = TextEditingController();
   TextEditingController presentAddressLine1Controller = TextEditingController();
 
+  String? selectedCountry;
+  String? selectedState;
+  String? selectedCity;
+
   int currentSection = 1;
   bool isLastSection = false;
 
@@ -37,7 +42,7 @@ class _IdentityScreenState extends State<IdentityScreen> {
         print('Token not found in shared preferences');
         return;
       }
-
+      // String address = presentAddressLine1Controller.text;
       List<Map<String, dynamic>>? personalData =
           await PersonalApi.getPersonalInformation(token);
 
@@ -122,13 +127,14 @@ class _IdentityScreenState extends State<IdentityScreen> {
 
   void _nextSection() async {
     try {
+      final String address = presentAddressLine1Controller.text;
       Map<String, dynamic> personalInformationData = {
         'uan': uanController.text,
         'pan': panController.text,
         'working_phone': workNumberController.text,
         'personal_phone': personalNumberController.text,
         'personal_email': personalEmailController.text,
-        'address': presentAddressLine1Controller.text,
+        'address': '$address,$selectedCity,$selectedState,$selectedCountry',
       };
 
       await PersonalApi.personalInformationData(
@@ -172,25 +178,25 @@ class _IdentityScreenState extends State<IdentityScreen> {
         const SizedBox(height: 15),
         _buildTextField(
           hintText: 'PAN Number',
-          prefixIconData: Icons.pin,
+          prefixIconData: Icons.pan_tool,
           controller: panController,
         ),
         const SizedBox(height: 15),
         _buildTextField(
           hintText: 'Working Num',
-          prefixIconData: Icons.pin,
+          prefixIconData: Icons.pin_drop_outlined,
           controller: workNumberController,
         ),
         const SizedBox(height: 15),
         _buildTextField(
           hintText: 'Personal Number',
-          prefixIconData: Icons.pin,
+          prefixIconData: Icons.phone_android,
           controller: personalNumberController,
         ),
         const SizedBox(height: 15),
         _buildTextField(
           hintText: 'Personal Email',
-          prefixIconData: Icons.pin,
+          prefixIconData: Icons.email_outlined,
           controller: personalEmailController,
         ),
         const SizedBox(height: 15),
@@ -198,6 +204,65 @@ class _IdentityScreenState extends State<IdentityScreen> {
           controller: presentAddressLine1Controller,
           hintText: 'Address Line 1',
           prefixIconData: Icons.person,
+        ),
+        const SizedBox(height: 15),
+        CSCPicker(
+          showStates: true,
+          showCities: true,
+          flagState: CountryFlag.DISABLE,
+          dropdownDecoration: BoxDecoration(
+            borderRadius: const BorderRadius.all(Radius.circular(3)),
+            color: Colors.grey.withOpacity(0),
+            border: Border.all(
+              color: Colors.grey.withOpacity(0.5),
+              width: 1.0,
+            ),
+          ),
+          disabledDropdownDecoration: BoxDecoration(
+            borderRadius: const BorderRadius.all(Radius.circular(3)),
+            color: Colors.grey.withOpacity(0.0),
+            border: Border.all(
+              color: Colors.grey.withOpacity(0.5),
+              width: 1.0,
+            ),
+          ),
+          countrySearchPlaceholder: "Country",
+          stateSearchPlaceholder: "State",
+          citySearchPlaceholder: "City",
+          countryDropdownLabel: "Country",
+          stateDropdownLabel: "State",
+          cityDropdownLabel: "City",
+          selectedItemStyle: TextStyle(
+            height: 3,
+            color: Colors.black.withOpacity(0.7),
+            fontSize: 14,
+          ),
+          dropdownHeadingStyle: const TextStyle(
+            color: Colors.black,
+            fontSize: 17,
+            fontWeight: FontWeight.bold,
+          ),
+          dropdownItemStyle: const TextStyle(
+            color: Colors.black,
+            fontSize: 14,
+          ),
+          dropdownDialogRadius: 10.0,
+          searchBarRadius: 10.0,
+          onCountryChanged: (value) {
+            setState(() {
+              selectedCountry = value;
+            });
+          },
+          onStateChanged: (value) {
+            setState(() {
+              selectedState = value;
+            });
+          },
+          onCityChanged: (value) {
+            setState(() {
+              selectedCity = value;
+            });
+          },
         ),
       ],
     );
@@ -214,6 +279,12 @@ class _IdentityScreenState extends State<IdentityScreen> {
         decoration: InputDecoration(
           hintText: hintText,
           prefixIcon: Icon(prefixIconData),
+          enabledBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.grey),
+          ),
+          focusedBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.grey),
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(6),
             borderSide: const BorderSide(

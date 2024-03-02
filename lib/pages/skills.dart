@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -30,6 +31,7 @@ class _SkillsScreenState extends State<SkillsScreen> {
   final List<Skills> roleside = [];
   TextEditingController nameController = TextEditingController();
   List<String> roleData = [];
+  Timer? _timer;
 
   @override
   void initState() {
@@ -38,9 +40,19 @@ class _SkillsScreenState extends State<SkillsScreen> {
     _initAuthToken();
   }
 
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
   Future<void> _initAuthToken() async {
-    String token = await getAuthToken() as String;
-    _fetchSkillsGet(token);
+    // String token = await getAuthToken() as String;
+    _fetchSkillsGet();
+
+    _timer ??= Timer.periodic(const Duration(seconds: 2), (timer) {
+      _fetchSkillsGet();
+    });
   }
 
   Future<String?> getAuthToken() async {
@@ -48,10 +60,11 @@ class _SkillsScreenState extends State<SkillsScreen> {
     return prefs.getString('token');
   }
 
-  Future<void> _fetchSkillsGet(String token) async {
+  Future<void> _fetchSkillsGet() async {
     const String roleApiUrl = '${URLConstants.baseUrl}/api/skills';
 
     try {
+      String token = await getAuthToken() as String;
       final response = await http.get(
         Uri.parse(roleApiUrl),
         headers: {
