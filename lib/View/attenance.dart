@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:wHRMS/ThemeColor/theme.dart';
@@ -19,11 +20,19 @@ class AttendanceScreen extends StatefulWidget {
 class _AttendanceScreenState extends State<AttendanceScreen> {
   TextEditingController dateController = TextEditingController();
   TextEditingController checkinController = TextEditingController();
-  TextEditingController statusController = TextEditingController();
+  // TextEditingController statusController = TextEditingController();
+  TextEditingController reasonController = TextEditingController();
+  // TextEditingController typeController = TextEditingController();
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   // final Logger _logger = Logger();
+
+  String? selectedAttedanceType;
+  final List<String> attendanceOptions = ['Work From Office', 'Work From Home'];
+
+  String? selectedStatus;
+  final List<String> statusOptions = ['present', 'absent'];
 
   static Future<String?> getAuthToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -60,8 +69,16 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
       if (response.statusCode == 201) {
         // final employeeData = json.decode(response.body);
-        // print('Attendance successfully: $employeeData');
+        print('Attendance successfully: ${response.body}');
+        dateController.clear();
+        checkinController.clear();
 
+        reasonController.clear();
+        selectedAttedanceType = '';
+        setState(() {
+          selectedAttedanceType = '';
+          selectedStatus = '';
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             backgroundColor: Colors.green,
@@ -69,6 +86,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           ),
         );
       } else if (response.statusCode == 400) {
+        print('Response body: ${response.body}');
         // Handle bad request error
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -78,6 +96,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         );
       } else if (response.statusCode >= 500) {
         // Handle server error
+        print('Response body: ${response.body}');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             backgroundColor: Colors.red,
@@ -100,10 +119,13 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   }
 
   Map<String, String> _buildRequestBody() {
+    String currentDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
     return {
-      'date': dateController.text,
+      'date': currentDate,
       'check_in': checkinController.text,
-      'status': statusController.text,
+      'status': selectedStatus ?? '',
+      'reason': reasonController.text,
+      'attendance_type': selectedAttedanceType ?? '',
     };
   }
 
@@ -144,7 +166,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 10),
+                const SizedBox(height: 5),
                 const Align(
                   alignment: Alignment.topLeft,
                   child: Text(
@@ -156,17 +178,17 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                     textAlign: TextAlign.start,
                   ),
                 ),
-                const SizedBox(height: 15),
-                TextWidget.buildTextFields(
+                const SizedBox(height: 10),
+                TextWidget.buildDateField(
                   hintText: 'Date',
-                  controller: dateController,
+                  // controller: dateController,
                   prefixIconData: Icons.date_range_outlined,
                   fieldName: 'Date',
                   isDateField: true,
                   context: context,
                 ),
-                const SizedBox(height: 20),
-                TextWidget.buildTextFieldss(
+                const SizedBox(height: 10),
+                TextWidget.buildDateTimeField(
                   hintText: 'Check In',
                   controller: checkinController,
                   prefixIconData: Icons.timelapse,
@@ -174,14 +196,51 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                   isDateField: true,
                   context: context,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
                 TextWidget.buildTextField(
-                  hintText: 'Status',
-                  controller: statusController,
-                  prefixIconData: Icons.star_outline_sharp,
-                  fieldName: 'Status',
+                  hintText: 'Reason',
+                  controller: reasonController,
+                  prefixIconData: Icons.receipt_sharp,
+                  fieldName: 'Reason',
                 ),
-                const SizedBox(height: 15),
+                const SizedBox(height: 10),
+                TextWidget.buildDropdownFormField(
+                  items: attendanceOptions,
+                  selectedValue: selectedAttedanceType,
+                  hintText: 'Attendance Type',
+                  onChanged: (String? value) {
+                    setState(() {
+                      selectedAttedanceType = value;
+                    });
+                  },
+                  fieldName: 'Attendance Type',
+                  prefixIconData: Icons.access_alarm_sharp,
+                ),
+                const SizedBox(height: 10),
+                TextWidget.buildDropdownFormField(
+                  items: statusOptions,
+                  selectedValue: selectedStatus,
+                  hintText: 'Status',
+                  onChanged: (String? value) {
+                    setState(() {
+                      selectedStatus = value;
+                    });
+                  },
+                  fieldName: 'Status',
+                  prefixIconData: Icons.star_border_outlined,
+                ),
+                const SizedBox(height: 10),
+                const Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    'Check In Time : 09:30 AM',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 5),
                 Align(
                   alignment: Alignment.center,
                   child: SizedBox(
@@ -267,8 +326,8 @@ class _CalendarWidgetState extends State<CalendarWidget> {
         headers: headers,
       );
 
-      // _logger.d('Response status code: ${response.statusCode}');
-      // _logger.d('Response body: ${response.body}');
+      // print('Response status code: ${response.statusCode}');
+      // print('Response body: ${response.body}');
       if (response.statusCode == 200) {
         final dynamic responseData = json.decode(response.body);
         if (responseData != null && responseData is List<dynamic>) {

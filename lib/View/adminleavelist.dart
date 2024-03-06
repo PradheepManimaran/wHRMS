@@ -463,6 +463,7 @@ class _EmployeeListItemCardState extends State<EmployeeListItemCard> {
       child: Container(
         decoration: BoxDecoration(
           border: Border.all(color: Colors.grey.withOpacity(0.4)),
+          borderRadius: BorderRadius.circular(7),
         ),
         margin: const EdgeInsets.symmetric(vertical: 5),
         child: Column(

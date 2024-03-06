@@ -51,17 +51,35 @@ class _CreateEmployeeState extends State<CreateEmployee> {
   void initState() {
     super.initState();
     // Fetch dropdown data
-    _fetchDropdownData();
+    fetchAllData();
   }
 
-  Future<void> _fetchDropdownData() async {
-    // Fetch data for all dropdowns
-    await _fetchRoles();
-    await _fetchDepartments();
-    await _fetchDesignations();
-    await _fetchEnrollmentTypes();
-    await _fetchEnrollmentStatuses();
-    await _fetchSourceHires();
+  // Future<void> _fetchDropdownData() async {
+  //   // Fetch data for all dropdowns
+  //   await _fetchRoles();
+  //   await _fetchDepartments();
+  //   await _fetchDesignations();
+  //   await _fetchEnrollmentTypes();
+  //   await _fetchEnrollmentStatuses();
+  //   await _fetchSourceHires();
+  // }
+
+  Future<void> fetchAllData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString('token') ?? '';
+
+    try {
+      await Future.wait([
+        _fetchRoles(token),
+        _fetchDepartments(token),
+        _fetchDesignations(token),
+        _fetchEnrollmentTypes(token),
+        _fetchEnrollmentStatuses(token),
+        _fetchSourceHires(token),
+      ]);
+    } catch (e) {
+      _handleError(e);
+    }
   }
 
   Future<void> _createEmployee() async {
@@ -120,7 +138,7 @@ class _CreateEmployeeState extends State<CreateEmployee> {
         print('Employee created successfully: $employeeData');
 
         // Fetch dropdown data again after successful creation
-        _fetchDropdownData();
+        // _fetchDropdownData();
 
         // Navigate to HomeScreen
         Navigator.pushReplacement(
@@ -178,7 +196,7 @@ class _CreateEmployeeState extends State<CreateEmployee> {
     }
   }
 
-  Future<void> _fetchRoles() async {
+  Future<void> _fetchRoles(String token) async {
     const String roleApiUrl = '${URLConstants.baseUrl}/api/role';
 
     try {
@@ -205,7 +223,13 @@ class _CreateEmployeeState extends State<CreateEmployee> {
               }));
         });
         // print('Body: ${response.body}');
-      } else {
+      } else if (response.statusCode == 401) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.red,
+            content: Text('Invalid Token. Please Try again.'),
+          ),
+        );
         // print('Error fetching roles. Status code: ${response.statusCode}');
         // print('Roles Response body: ${response.body}');
       }
@@ -214,7 +238,7 @@ class _CreateEmployeeState extends State<CreateEmployee> {
     }
   }
 
-  Future<void> _fetchDepartments() async {
+  Future<void> _fetchDepartments(String token) async {
     const String roleApiUrl = '${URLConstants.baseUrl}/api/department';
 
     try {
@@ -245,11 +269,11 @@ class _CreateEmployeeState extends State<CreateEmployee> {
         // print('Department Response body: ${response.body}');
       }
     } catch (e) {
-      _handleError(e);
+      // _handleError(e);
     }
   }
 
-  Future<void> _fetchDesignations() async {
+  Future<void> _fetchDesignations(String token) async {
     const String roleApiUrl = '${URLConstants.baseUrl}/api/designation';
 
     try {
@@ -281,11 +305,11 @@ class _CreateEmployeeState extends State<CreateEmployee> {
         // print('Designation Response body: ${response.body}');
       }
     } catch (e) {
-      _handleError(e);
+      // _handleError(e);
     }
   }
 
-  Future<void> _fetchEnrollmentTypes() async {
+  Future<void> _fetchEnrollmentTypes(String token) async {
     const String roleApiUrl = '${URLConstants.baseUrl}/api/enrollment_type';
 
     try {
@@ -316,11 +340,11 @@ class _CreateEmployeeState extends State<CreateEmployee> {
         // print('EnrollType Response body: ${response.body}');
       }
     } catch (e) {
-      _handleError(e);
+      // _handleError(e);
     }
   }
 
-  Future<void> _fetchEnrollmentStatuses() async {
+  Future<void> _fetchEnrollmentStatuses(String token) async {
     const String roleApiUrl = '${URLConstants.baseUrl}/api/enrollment_status';
 
     try {
@@ -353,11 +377,11 @@ class _CreateEmployeeState extends State<CreateEmployee> {
         // print('EnrollStatus Response body: ${response.body}');
       }
     } catch (e) {
-      _handleError(e);
+      // _handleError(e);
     }
   }
 
-  Future<void> _fetchSourceHires() async {
+  Future<void> _fetchSourceHires(String token) async {
     const String roleApiUrl = '${URLConstants.baseUrl}/api/source_hire';
 
     try {
@@ -388,7 +412,7 @@ class _CreateEmployeeState extends State<CreateEmployee> {
         // print('SourceHire Response body: ${response.body}');
       }
     } catch (e) {
-      _handleError(e);
+      // _handleError(e);
     }
   }
 
@@ -465,7 +489,7 @@ class _CreateEmployeeState extends State<CreateEmployee> {
                     ),
                     createText.buildEmployeeText(
                       controller: employeeIdController,
-                      hintText: 'Emp ID ',
+                      hintText: 'WEMP ',
                       prefixIconData: Icons.phone_android,
                       // fieldName: 'Emp ID',
                     ),
@@ -627,12 +651,12 @@ class _CreateEmployeeState extends State<CreateEmployee> {
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
                           _createEmployee();
-                          _fetchRoles();
-                          _fetchDepartments();
-                          _fetchDesignations();
-                          _fetchEnrollmentTypes();
-                          _fetchEnrollmentStatuses();
-                          _fetchSourceHires();
+                          // _fetchRoles(token);
+                          // _fetchDepartments();
+                          // _fetchDesignations();
+                          // _fetchEnrollmentTypes();
+                          // _fetchEnrollmentStatuses();
+                          // _fetchSourceHires();
                         }
                       },
                       style: ElevatedButton.styleFrom(

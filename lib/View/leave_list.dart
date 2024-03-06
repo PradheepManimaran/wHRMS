@@ -306,16 +306,10 @@ class EmployeeListItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // String _prependBaseUrl(String url) {
-    //   return '$url';
-    // }
-
     return Container(
-      // elevation: 1,
-      // margin: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 8.0),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.withOpacity(0.4)),
-      ),
+          border: Border.all(color: Colors.grey.withOpacity(0.4)),
+          borderRadius: BorderRadius.circular(7)),
       child: SizedBox(
         // height: 120,
         child: Row(

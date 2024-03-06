@@ -66,3 +66,39 @@ class Employee {
     );
   }
 }
+
+// class AdminApiHandler {
+//   Future<void> fetchEmployees(
+//       Function(List<Employee>) setState, Function(bool) setLoading) async {
+//     try {
+//       SharedPreferences prefs = await SharedPreferences.getInstance();
+//       String token = prefs.getString('token') ?? '';
+
+//       final response = await http.get(
+//         Uri.parse('${URLConstants.baseUrl}/api/users'),
+//         headers: {
+//           'Authorization': 'token $token',
+//           'Content-Type': 'application/json',
+//         },
+//       );
+
+//       if (response.statusCode == 200) {
+//         final dynamic data = jsonDecode(response.body);
+
+//         if (data is List) {
+//           setState(data.map((item) => Employee.fromJson(item)).toList());
+//           setLoading(false);
+//         } else if (data is Map<String, dynamic>) {
+//           setState([Employee.fromJson(data)]);
+//           setLoading(false);
+//         } else {
+//           // Handle unexpected response format
+//         }
+//       } else {
+//         // Handle failed request
+//       }
+//     } catch (e) {
+//       // Handle error
+//     }
+//   }
+// }

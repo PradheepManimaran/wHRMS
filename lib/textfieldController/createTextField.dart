@@ -74,7 +74,7 @@ class createText {
           fillColor: Colors.white,
           prefixIcon: Icon(prefixIconData),
           border: const OutlineInputBorder(),
-          hintText: 'EMP ID',
+          hintText: 'WEMP',
           // hintStyle: const TextStyle(color: Colors.blue),
         ),
         inputFormatters: [

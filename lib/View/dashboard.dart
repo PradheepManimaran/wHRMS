@@ -8,7 +8,6 @@ import 'package:wHRMS/objects/dash_obj.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:wHRMS/objects/personal.dart';
-import 'package:wHRMS/objects/profile_field.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({Key? key}) : super(key: key);
@@ -24,7 +23,7 @@ class _DashboardState extends State<Dashboard> {
   // final Logger _logger = Logger();
   DateTime? _selectedDay;
 
-  List<Employe> daage = [];
+  // List<Employe> daage = [];
   List<EmployeeName> employee = [];
   List<EventData> eventData = [];
 
@@ -64,13 +63,13 @@ class _DashboardState extends State<Dashboard> {
         if (data is List) {
           setState(() {
             employee = data.map((item) => EmployeeName.fromJson(item)).toList();
-            daage = data.map((item) => Employe.fromJson(item)).toList();
+            // daage = data.map((item) => Employe.fromJson(item)).toList();
           });
         } else if (data is Map<String, dynamic>) {
           // Single employee case
           setState(() {
             employee = [EmployeeName.fromJson(data)];
-            daage = [Employe.fromJson(data)];
+            // daage = [Employe.fromJson(data)];
           });
         } else {
           // if (kDebugMode) {
@@ -395,7 +394,6 @@ class _DashboardState extends State<Dashboard> {
       scrollDirection: Axis.horizontal,
       child: eventData.isEmpty
           ? Container(
-              // Render a default card when no data is available
               height: 80,
               width: 200,
               decoration: BoxDecoration(
@@ -404,7 +402,7 @@ class _DashboardState extends State<Dashboard> {
               ),
               child: const Center(
                 child: Text(
-                  '',
+                  'No Data Found',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 15,

@@ -38,15 +38,13 @@ class EmployeeProfile extends StatefulWidget {
 }
 
 class _EmployeeProfileState extends State<EmployeeProfile> {
-  List<EmployeesField> employeeProfile = [];
-
-  List<EmployeeName> employee = [];
   List<WorkExperience> work = [];
   List<EducationDetails> education = [];
-  List<Employe> daage = [];
+
   List<FamilyDetails> familyDetails = [];
   List<Certificate> certificate = [];
-  // Timer? _timer;
+
+  EmployeeName? emp;
 
   String? profile_picture;
 
@@ -54,236 +52,29 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
   void initState() {
     super.initState();
 
-    _initAuthToken();
-  }
-
-  // @override
-  // void dispose() {
-  //   _timer?.cancel();
-  //   super.dispose();
-  // }
-
-  Future<void> _initAuthToken() async {
-    // _timer ??= Timer.periodic(const Duration(seconds: 2), (timer) {
-    _fetchEmployeeProfile();
-    _fetchEmployee();
-    _fetchWorkExperience();
-    _fetchEducation();
-    _fetchImage();
-    _fetchFamily();
-    _fetchFile();
+    setState(() {
+      isLoading = true;
+    });
+    fetchAllData();
+    // WidgetsBinding.instance.addPostFrameCallback((_) async {
+    //   setState(() {
+    //     this.work = work;
+    //     this.familyDetails = familyDetails;
+    //     this.education = education;
+    //     isLoading = false;
+    //   });
     // });
+
+    isLoading = false;
   }
 
-  Future<void> _fetchEmployeeProfile() async {
+  Future<void> fetchAllData() async {
     try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String token = prefs.getString('token') ?? '';
-
-      final response = await http.get(
-        Uri.parse('${URLConstants.baseUrl}/api/employee'),
-        headers: {
-          'Authorization': 'token $token',
-          'Content-Type': 'application/json',
-        },
-      );
-
-      // print('Employee Status Code : ${response.statusCode}');
-      // print('Testing Employee Body : ${response.body}');
-
-      if (response.statusCode == 200) {
-        final dynamic data = jsonDecode(response.body);
-
-        if (data is List) {
-          setState(() {
-            employee = data.map((item) => EmployeeName.fromJson(item)).toList();
-            daage = data.map((item) => Employe.fromJson(item)).toList();
-            isLoading = false;
-          });
-        } else if (data is Map<String, dynamic>) {
-          // Single employee case
-          setState(() {
-            employee = [EmployeeName.fromJson(data)];
-            daage = [Employe.fromJson(data)];
-            isLoading = false;
-          });
-        } else {
-          // if (kDebugMode) {
-          //   print('Unexpected response format');
-          // }
-        }
-      } else {
-        // if (kDebugMode) {
-        //   print(
-        //       'Failed to load Employee data. Status code: ${response.statusCode}');
-        // }
-        // if (kDebugMode) {
-        //   print('Response body: ${response.body}');
-        // }
-      }
+      await Future.wait([
+        _fetchImage(),
+      ]);
     } catch (e) {
-      // if (kDebugMode) {
-      //   print('Error loading employee data: $e');
-      // }
-    }
-  }
-
-  Future<void> _fetchEmployee() async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String token = prefs.getString('token') ?? '';
-
-      final response = await http.get(
-        Uri.parse('${URLConstants.baseUrl}/api/user'),
-        headers: {
-          'Authorization': 'token $token',
-          'Content-Type': 'application/json',
-        },
-      );
-
-      // _logger.d('User Status Code : ${response.statusCode}');
-      // _logger.d('Testing User Body : ${response.body}');
-
-      if (response.statusCode == 200) {
-        final dynamic data = jsonDecode(response.body);
-
-        if (data is List) {
-          setState(() {
-            employeeProfile =
-                data.map((item) => EmployeesField.fromJson(item)).toList();
-            isLoading = false;
-          });
-        } else if (data is Map<String, dynamic>) {
-          // Single employee case
-          setState(() {
-            employeeProfile = [EmployeesField.fromJson(data)];
-            isLoading = false;
-          });
-        } else {
-          // if (kDebugMode) {
-          //   print('Unexpected response format');
-          // }
-        }
-      } else {
-        // if (kDebugMode) {
-        //   print(
-        //       'Failed to load User data. Status code: ${response.statusCode}');
-        // }
-        // if (kDebugMode) {
-        //   print('Response body: ${response.body}');
-        // }
-      }
-    } catch (e) {
-      // if (kDebugMode) {
-      //   print('Error loading employee data: $e');
-      // }
-    }
-  }
-
-  Future<void> _fetchWorkExperience() async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String token = prefs.getString('token') ?? '';
-
-      final response = await http.get(
-        Uri.parse('${URLConstants.baseUrl}/api/work_experiences'),
-        headers: {
-          'Authorization': 'token $token',
-          'Content-Type': 'application/json',
-        },
-      );
-
-      // if (kDebugMode) {
-      //   print('Response token: $token');
-      // }
-
-      // _logger.d('Work_Experience Status Code : ${response.statusCode}');
-      // _logger.d('Testing Work_Experience Body : ${response.body}');
-
-      if (response.statusCode == 200) {
-        final dynamic data = jsonDecode(response.body);
-
-        if (data is List) {
-          setState(() {
-            work = data.map((item) => WorkExperience.fromJson(item)).toList();
-            isLoading = false;
-          });
-        } else if (data is Map<String, dynamic>) {
-          // Single employee case
-          setState(() {
-            work = [WorkExperience.fromJson(data)];
-            isLoading = false;
-          });
-        } else {
-          // if (kDebugMode) {
-          //   print('Unexpected response format');
-          // }
-        }
-      } else {
-        // if (kDebugMode) {
-        //   print(
-        //       'Failed to load Work_experience data. Status code: ${response.statusCode}');
-        // }
-        // if (kDebugMode) {
-        //   print('Response body: ${response.body}');
-        // }
-      }
-    } catch (e) {
-      // if (kDebugMode) {
-      //   print('Error loading Work_Experience data: $e');
-      // }
-    }
-  }
-
-  Future<void> _fetchEducation() async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String token = prefs.getString('token') ?? '';
-
-      final response = await http.get(
-        Uri.parse('${URLConstants.baseUrl}/api/education'),
-        headers: {
-          'Authorization': 'token $token',
-          'Content-Type': 'application/json',
-        },
-      );
-
-      // _logger.d('Education Status Code : ${response.statusCode}');
-      // _logger.d('Testing Education Body : ${response.body}');
-
-      if (response.statusCode == 200) {
-        final dynamic data = jsonDecode(response.body);
-
-        if (data is List) {
-          setState(() {
-            education =
-                data.map((item) => EducationDetails.fromJson(item)).toList();
-            isLoading = false;
-          });
-        } else if (data is Map<String, dynamic>) {
-          // Single employee case
-          setState(() {
-            work = [WorkExperience.fromJson(data)];
-            isLoading = false;
-          });
-        } else {
-          // if (kDebugMode) {
-          //   print('Unexpected response format');
-          // }
-        }
-      } else {
-        // if (kDebugMode) {
-        //   print(
-        //       'Failed to load Education data. Status code: ${response.statusCode}');
-        // }
-        // if (kDebugMode) {
-        //   print('Response body: ${response.body}');
-        // }
-      }
-    } catch (e) {
-      // if (kDebugMode) {
-      //   print('Error loading Education data: $e');
-      // }
+      // _handleError(e);
     }
   }
 
@@ -300,9 +91,6 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
         },
       );
 
-      // _logger.d('User Status Code: ${response.statusCode}');
-      // _logger.d('Testing User Body: ${response.body}');
-
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
 
@@ -312,137 +100,15 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
           setState(() {
             // Assuming profile_picture_url is the key in your API response
             profile_picture = firstItem['profile_picture'] ?? '';
-            // _logger.d('Testing User: $firstItem');
-          });
-        } else {
-          // if (kDebugMode) {
-          //   print('Empty response');
-          // }
-        }
-      } else {
-        // if (kDebugMode) {
-        //   print(
-        //       'Failed to load Image data. Status code: ${response.statusCode}');
-        // }
-        // if (kDebugMode) {
-        //   print('Response body: ${response.body}');
-        // }
-      }
-    } catch (e) {
-      // if (kDebugMode) {
-      //   print('Error loading image data: $e');
-      // }
-    }
-  }
-
-  Future<void> _fetchFamily() async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String token = prefs.getString('token') ?? '';
-
-      final response = await http.get(
-        Uri.parse('${URLConstants.baseUrl}/api/familyinfo'),
-        headers: {
-          'Authorization': 'token $token',
-          'Content-Type': 'application/json',
-        },
-      );
-
-      // _logger.d('Family Status Code : ${response.statusCode}');
-      // _logger.d('Testing Family Body : ${response.body}');
-
-      if (response.statusCode == 200) {
-        final dynamic data = jsonDecode(response.body);
-
-        if (data is List) {
-          setState(() {
-            familyDetails =
-                data.map((item) => FamilyDetails.fromJson(item)).toList();
             isLoading = false;
           });
-        } else if (data is Map<String, dynamic>) {
-          // Single employee case
-          setState(() {
-            work = [WorkExperience.fromJson(data)];
-            isLoading = false;
-          });
-        } else {
-          // if (kDebugMode) {
-          //   print('Unexpected response format');
-          // }
-        }
-      } else {
-        // if (kDebugMode) {
-        //   print(
-        //       'Failed to load Family data. Status code: ${response.statusCode}');
-        // }
-        // if (kDebugMode) {
-        //   print('Response body: ${response.body}');
-        // }
-      }
-    } catch (e) {
-      // if (kDebugMode) {
-      //   print('Error loading Family data: $e');
-      // }
-    }
-  }
-
-  Future<void> _fetchFile() async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String token = prefs.getString('token') ?? '';
-
-      final response = await http.get(
-        Uri.parse('${URLConstants.baseUrl}/api/certificate'),
-        headers: {
-          'Authorization': 'token $token',
-          'Content-Type': 'application/json',
-        },
-      );
-
-      // _logger.d('Family Status Code : ${response.statusCode}');
-      // _logger.d('Testing Family Body : ${response.body}');
-
-      if (response.statusCode == 200) {
-        final dynamic data = jsonDecode(response.body);
-
-        if (data is List) {
-          setState(() {
-            certificate =
-                data.map((item) => Certificate.fromJson(item)).toList();
-            isLoading = false;
-          });
-        } else if (data is Map<String, dynamic>) {
-          // Single employee case
-          setState(() {
-            certificate = [Certificate.fromJson(data)];
-            isLoading = false;
-          });
-        } else {
-          // if (kDebugMode) {
-          //   print('Unexpected response format');
-          // }
-        }
-      } else {
-        // if (kDebugMode) {
-        //   print(
-        //       'Failed to load Family data. Status code: ${response.statusCode}');
-        // }
-        // if (kDebugMode) {
-        //   print('Response body: ${response.body}');
-        // }
-      }
-    } catch (e) {
-      // if (kDebugMode) {
-      //   print('Error loading Family data: $e');
-      // }
-    }
+        } else {}
+      } else {}
+    } catch (e) {}
   }
 
   String? profilePicture;
   String? userId;
-
-  // ProfileImageUploader _imageUploader = ProfileImageUploader();
 
   // Call fetchUserId method from the instance
   void editProfileImage() async {
@@ -465,23 +131,10 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
             setState(() {
               userId = id;
             });
-          } else {
-            // if (kDebugMode) {
-            //   print('Failed to fetch user ID after updating profile picture');
-            // }
-          }
-        } else {
-          // if (kDebugMode) {
-          //   print('Failed to fetch user ID');
-          // }
-        }
+          } else {}
+        } else {}
       }
-    } catch (e) {
-      // if (kDebugMode) {
-      //   print('Error selecting image: $e');
-      // }
-      // Handle the error here, if necessary
-    }
+    } catch (e) {}
   }
 
   bool isLoading = true;
@@ -491,6 +144,7 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
   @override
   Widget build(BuildContext context) {
     final double top = cover - img / 2;
+
     return isLoading
         ? Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -498,11 +152,6 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
             children: [
               const SizedBox(height: 10.0),
               _buildShimmerLoading(),
-              // _buildShimmerLoading(),
-              // _buildShimmerLoading(),
-              // _buildShimmerLoading(),
-              // _buildShimmerLoading(),
-              // _buildShimmerLoading(),
             ],
           )
         : Column(
@@ -555,25 +204,25 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
                                 : SizedBox(),
                           ),
                           // Camera icon
-                          // Positioned(
-                          //   bottom: 0,
-                          //   right: 0,
-                          //   child: Container(
-                          //     decoration: const BoxDecoration(
-                          //       color: Colors.white,
-                          //       shape: BoxShape.circle,
-                          //     ),
-                          //     child: IconButton(
-                          //       icon: const Icon(
-                          //         Icons.camera_alt_outlined,
-                          //         color: Colors.black,
-                          //       ),
-                          //       onPressed: () {
-                          //         editProfileImage();
-                          //       },
-                          //     ),
-                          //   ),
-                          // ),
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                color: ThemeColor.app_bar,
+                                shape: BoxShape.circle,
+                              ),
+                              child: IconButton(
+                                icon: const Icon(
+                                  Icons.camera_alt_outlined,
+                                  color: Colors.white,
+                                ),
+                                onPressed: () {
+                                  editProfileImage();
+                                },
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -586,7 +235,7 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      employee.isNotEmpty ? employee[0].firstname : 'Null',
+                      '${EmployeeModel.employeeData.isNotEmpty ? EmployeeModel.employeeData[0].firstname : ''}',
                       style: const TextStyle(
                         color: Colors.black,
                         fontWeight: FontWeight.bold,
@@ -595,7 +244,7 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
                     ),
                     const SizedBox(width: 10.0),
                     Text(
-                      employee.isNotEmpty ? employee[0].lastname : 'Null',
+                      '${EmployeeModel.employeeData.isNotEmpty ? EmployeeModel.employeeData[0].lastname : ''}',
                       style: const TextStyle(
                         color: Colors.black,
                         fontWeight: FontWeight.bold,
@@ -661,51 +310,50 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          for (int i = 0; i < employee.length; i++)
-                            if (i < employeeProfile.length)
-                              if (i < daage.length)
-                                Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        color: Colors.grey.withOpacity(0.4)),
-                                    borderRadius: BorderRadius.circular(7),
-                                  ),
-                                  // child: Card(
-                                  //   color: Colors.white,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const SizedBox(height: 10),
-                                      TextWithPadding(
-                                        label: 'Employee Id',
-                                        value: employeeProfile[i].id.toString(),
-                                      ),
-                                      const SizedBox(height: 10),
-                                      TextWithPadding(
-                                        label: 'User Name',
-                                        value: employeeProfile[i].username,
-                                      ),
-                                      const SizedBox(height: 10),
-                                      TextWithPadding(
-                                        label: 'Age',
-                                        value: daage[i].age.toString(),
-                                      ),
-                                      const SizedBox(height: 10),
-                                      TextWithPadding(
-                                        label: 'Date of Birth',
-                                        value: daage[i].date.toString(),
-                                      ),
-                                      const SizedBox(height: 10),
-                                      TextWithPadding(
-                                        label: 'Email Id',
-                                        value: employeeProfile[i].emailid,
-                                      ),
-                                      const SizedBox(height: 10),
-                                    ],
-                                  ),
-                                  // ),
+                          Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                  color: Colors.grey.withOpacity(0.4)),
+                              borderRadius: BorderRadius.circular(7),
+                            ),
+                            // child: Card(
+                            //   color: Colors.white,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 10),
+                                TextWithPadding(
+                                  label: 'Employee Id',
+                                  value:
+                                      '${EmployeeApiProfile.employee.isNotEmpty ? EmployeeApiProfile.employee[0].id : ''}',
                                 ),
+                                const SizedBox(height: 10),
+                                TextWithPadding(
+                                    label: 'User Name',
+                                    value:
+                                        '${EmployeeApiProfile.employee.isNotEmpty ? EmployeeApiProfile.employee[0].username : ''}'),
+                                const SizedBox(height: 10),
+                                TextWithPadding(
+                                  label: 'Age',
+                                  value:
+                                      '${EmployeeModel.employeeData.isNotEmpty ? EmployeeModel.employeeData[0].age : ''}',
+                                ),
+                                const SizedBox(height: 10),
+                                TextWithPadding(
+                                  label: 'Date of Birth',
+                                  value:
+                                      '${EmployeeModel.employeeData.isNotEmpty ? EmployeeModel.employeeData[0].date : ''}',
+                                ),
+                                const SizedBox(height: 10),
+                                TextWithPadding(
+                                    label: 'Email Id',
+                                    value:
+                                        '${EmployeeApiProfile.employee.isNotEmpty ? EmployeeApiProfile.employee[0].emailid : ''}'),
+                                const SizedBox(height: 10),
+                              ],
+                            ),
+                            // ),
+                          ),
                         ],
                       ),
                     ),
@@ -751,53 +399,56 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
                       ],
                     ),
                     const SizedBox(height: 10),
-                    for (int i = 0; i < employee.length; i++)
-                      if (i < employeeProfile.length)
-                        Container(
-                          // Card(
-                          //   color: Colors.white,
-                          decoration: BoxDecoration(
-                            border:
-                                Border.all(color: Colors.grey.withOpacity(0.4)),
-                            borderRadius: BorderRadius.circular(7),
+                    Container(
+                      // Card(
+                      //   color: Colors.white,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.withOpacity(0.4)),
+                        borderRadius: BorderRadius.circular(7),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 10),
+                          TextWithPadding(
+                            label: 'UAN',
+                            value:
+                                '${EmployeeModel.employeeData.isNotEmpty ? EmployeeModel.employeeData[0].uan : ''}',
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: 10),
-                              TextWithPadding(
-                                label: 'UAN',
-                                value: employee[i].uan.toString(),
-                              ),
-                              const SizedBox(height: 15),
-                              TextWithPadding(
-                                label: 'PAN',
-                                value: employee[i].pan,
-                              ),
-                              const SizedBox(height: 15),
-                              TextWithPadding(
-                                label: 'Work Number',
-                                value: employee[i].workNumber,
-                              ),
-                              const SizedBox(height: 15),
-                              TextWithPadding(
-                                label: 'Personal Number',
-                                value: employee[i].personalNumber,
-                              ),
-                              const SizedBox(height: 15),
-                              TextWithPadding(
-                                label: 'Personal Email',
-                                value: employee[i].personalEmail,
-                              ),
-                              const SizedBox(height: 15),
-                              TextWithPadding(
-                                label: 'Address',
-                                value: employee[i].address,
-                              ),
-                              const SizedBox(height: 15),
-                            ],
+                          const SizedBox(height: 15),
+                          TextWithPadding(
+                            label: 'PAN',
+                            value:
+                                '${EmployeeModel.employeeData.isNotEmpty ? EmployeeModel.employeeData[0].pan : ''}',
                           ),
-                        ),
+                          const SizedBox(height: 15),
+                          TextWithPadding(
+                            label: 'Work Number',
+                            value:
+                                '${EmployeeModel.employeeData.isNotEmpty ? EmployeeModel.employeeData[0].workNumber : ''}',
+                          ),
+                          const SizedBox(height: 15),
+                          TextWithPadding(
+                            label: 'Personal Number',
+                            value:
+                                '${EmployeeModel.employeeData.isNotEmpty ? EmployeeModel.employeeData[0].personalNumber : ''}',
+                          ),
+                          const SizedBox(height: 15),
+                          TextWithPadding(
+                            label: 'Personal Email',
+                            value:
+                                '${EmployeeModel.employeeData.isNotEmpty ? EmployeeModel.employeeData[0].personalEmail : ''}',
+                          ),
+                          const SizedBox(height: 15),
+                          TextWithPadding(
+                            label: 'Address',
+                            value:
+                                '${EmployeeModel.employeeData.isNotEmpty ? EmployeeModel.employeeData[0].address : ''}',
+                          ),
+                          const SizedBox(height: 15),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -833,23 +484,31 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
                   ],
                 ),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: education.isNotEmpty
-                    ? education.map((item) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                    color: Colors.grey.withOpacity(0.4)),
-                                borderRadius: BorderRadius.circular(7),
-                              ),
-                              margin: const EdgeInsets.symmetric(
-                                  horizontal: 18.0, vertical: 8.0),
-                              child: Padding(
-                                padding: const EdgeInsets.all(10.0),
+              Center(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FutureBuilder<List<EducationDetails>>(
+                      future: EducationProfile.fetchEducationData(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Container(); // Don't show any loading indicator
+                        } else if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}');
+                        } else if (snapshot.hasData &&
+                            snapshot.data!.isNotEmpty) {
+                          // Iterate over each education item and display them individually
+                          return Column(
+                            children: snapshot.data!.map((education) {
+                              return Container(
+                                margin: const EdgeInsets.symmetric(
+                                    horizontal: 18.0, vertical: 8.0),
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                      color: Colors.grey.withOpacity(0.4)),
+                                  borderRadius: BorderRadius.circular(7),
+                                ),
                                 child: Stack(
                                   children: [
                                     Column(
@@ -860,11 +519,12 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
                                           children: [
                                             const SizedBox(width: 10),
                                             Text(
-                                              item.universityName.toString(),
+                                              education.universityName,
                                               style: const TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.black87),
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.black87,
+                                              ),
                                             ),
                                           ],
                                         ),
@@ -873,21 +533,20 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
                                           children: [
                                             const SizedBox(width: 10),
                                             Text(
-                                              item.degree,
+                                              education.degree,
                                               style: const TextStyle(
                                                 fontSize: 14,
                                               ),
                                             ),
                                             const SizedBox(width: 10),
                                             Text(
-                                              item.specialization,
+                                              education.specialization,
                                               style: const TextStyle(
                                                 fontSize: 14,
                                               ),
                                             ),
                                           ],
                                         ),
-                                        const SizedBox(width: 10),
                                         Row(
                                           children: [
                                             const SizedBox(width: 10),
@@ -897,9 +556,8 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
                                                 fontSize: 14,
                                               ),
                                             ),
-                                            const SizedBox(width: 10),
                                             Text(
-                                              item.completeyear,
+                                              education.completeyear,
                                               style: const TextStyle(
                                                 fontSize: 14,
                                               ),
@@ -927,15 +585,16 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
                                                   milliseconds: 300),
                                               child: EducationEditScreen(
                                                 educationData: {
-                                                  'id': item.id,
+                                                  'id': education.id,
                                                   'institute_name':
-                                                      item.universityName,
-                                                  'degree_diploma': item.degree,
+                                                      education.universityName,
+                                                  'degree_diploma':
+                                                      education.degree,
                                                   'specialization':
-                                                      item.specialization,
+                                                      education.specialization,
                                                   'date_of_completion':
-                                                      item.completeyear,
-                                                  'cgpa': item.cgpa,
+                                                      education.completeyear,
+                                                  'cgpa': education.cgpa,
                                                 },
                                               ),
                                             ),
@@ -945,31 +604,36 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
                                     ),
                                   ],
                                 ),
+                              );
+                            }).toList(),
+                          );
+                        } else {
+                          return Container(
+                            height: 100,
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 18.0, vertical: 8.0),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                  color: Colors.grey.withOpacity(0.4)),
+                              borderRadius: BorderRadius.circular(7),
+                            ),
+                            child: const Center(
+                              child: Text(
+                                'No data found',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                          ],
-                        );
-                      }).toList()
-                    : [
-                        Container(
-                          margin: const EdgeInsets.symmetric(
-                              horizontal: 18.0, vertical: 8.0),
-                          decoration: BoxDecoration(
-                            border:
-                                Border.all(color: Colors.grey.withOpacity(0.4)),
-                          ),
-                          child: const Center(
-                            child: Text(
-                              'No data found',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                          );
+                        }
+                      },
+                    ),
+                  ],
+                ),
               ),
+
               // const SizedBox(height: 15),
               Container(
                 padding:
@@ -1321,23 +985,31 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
                   ],
                 ),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: familyDetails.isNotEmpty
-                    ? familyDetails.map((familyDetails) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                    color: Colors.grey.withOpacity(0.4)),
-                                borderRadius: BorderRadius.circular(7),
-                              ),
-                              margin: const EdgeInsets.symmetric(
-                                  horizontal: 18.0, vertical: 8.0),
-                              child: Padding(
-                                padding: const EdgeInsets.all(10.0),
+              Center(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FutureBuilder<List<FamilyDetails>>(
+                      future: FamilyApiHandler.fetchFamily(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Container(); // Don't show any loading indicator
+                        } else if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}');
+                        } else if (snapshot.hasData &&
+                            snapshot.data!.isNotEmpty) {
+                          // Iterate over each education item and display them individually
+                          return Column(
+                            children: snapshot.data!.map((familyDetails) {
+                              return Container(
+                                margin: const EdgeInsets.symmetric(
+                                    horizontal: 18.0, vertical: 8.0),
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                      color: Colors.grey.withOpacity(0.4)),
+                                  borderRadius: BorderRadius.circular(7),
+                                ),
                                 child: Stack(
                                   children: [
                                     Column(
@@ -1348,11 +1020,12 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
                                           children: [
                                             const SizedBox(width: 10),
                                             Text(
-                                              familyDetails.name.toString(),
+                                              familyDetails.name,
                                               style: const TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.black87),
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.black87,
+                                              ),
                                             ),
                                           ],
                                         ),
@@ -1361,7 +1034,7 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
                                           children: [
                                             const SizedBox(width: 10),
                                             const Text(
-                                              'Relationship:',
+                                              'Relation:',
                                               style: TextStyle(
                                                 fontSize: 14,
                                               ),
@@ -1375,7 +1048,6 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
                                             ),
                                           ],
                                         ),
-                                        const SizedBox(width: 10),
                                         Row(
                                           children: [
                                             const SizedBox(width: 10),
@@ -1387,7 +1059,6 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
                                             ),
                                           ],
                                         ),
-                                        const SizedBox(width: 10),
                                         Row(
                                           children: [
                                             const SizedBox(width: 10),
@@ -1436,32 +1107,33 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
                                     ),
                                   ],
                                 ),
+                              );
+                            }).toList(),
+                          );
+                        } else {
+                          return Container(
+                            height: 100,
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 18.0, vertical: 8.0),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                  color: Colors.grey.withOpacity(0.4)),
+                            ),
+                            child: const Center(
+                              child: Text(
+                                'No data found',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                          ],
-                        );
-                      }).toList()
-                    : [
-                        Container(
-                          height: 100,
-                          margin: const EdgeInsets.symmetric(
-                              horizontal: 18.0, vertical: 8.0),
-                          decoration: BoxDecoration(
-                            border:
-                                Border.all(color: Colors.grey.withOpacity(0.4)),
-                            borderRadius: BorderRadius.circular(7),
-                          ),
-                          child: const Center(
-                            child: Text(
-                              'No data found',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                          );
+                        }
+                      },
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 15),
               Container(
@@ -1496,23 +1168,31 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
                   ],
                 ),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: work.isNotEmpty
-                    ? work.map((work) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                    color: Colors.grey.withOpacity(0.4)),
-                                borderRadius: BorderRadius.circular(7),
-                              ),
-                              margin: const EdgeInsets.symmetric(
-                                  horizontal: 18.0, vertical: 8.0),
-                              child: Padding(
-                                padding: const EdgeInsets.all(10.0),
+              Center(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FutureBuilder<List<WorkExperience>>(
+                      future: workProfile.fetchWorkExperience(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Container(); // Don't show any loading indicator
+                        } else if (snapshot.hasError) {
+                          return Text('Error: ${snapshot.error}');
+                        } else if (snapshot.hasData &&
+                            snapshot.data!.isNotEmpty) {
+                          // Iterate over each education item and display them individually
+                          return Column(
+                            children: snapshot.data!.map((work) {
+                              return Container(
+                                margin: const EdgeInsets.symmetric(
+                                    horizontal: 18.0, vertical: 8.0),
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                      color: Colors.grey.withOpacity(0.4)),
+                                  borderRadius: BorderRadius.circular(7),
+                                ),
                                 child: Stack(
                                   children: [
                                     Column(
@@ -1523,11 +1203,12 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
                                           children: [
                                             const SizedBox(width: 10),
                                             Text(
-                                              work.description.toString(),
+                                              work.designation,
                                               style: const TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.black87),
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.black87,
+                                              ),
                                             ),
                                           ],
                                         ),
@@ -1543,7 +1224,6 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
                                             ),
                                           ],
                                         ),
-                                        const SizedBox(width: 10),
                                         Row(
                                           children: [
                                             const SizedBox(width: 10),
@@ -1606,30 +1286,34 @@ class _EmployeeProfileState extends State<EmployeeProfile> {
                                     ),
                                   ],
                                 ),
+                              );
+                            }).toList(),
+                          );
+                        } else {
+                          return Container(
+                            height: 100,
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 18.0, vertical: 8.0),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                  color: Colors.grey.withOpacity(0.4)),
+                              borderRadius: BorderRadius.circular(7),
+                            ),
+                            child: const Center(
+                              child: Text(
+                                'No data found',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                          ],
-                        );
-                      }).toList()
-                    : [
-                        Container(
-                          margin: const EdgeInsets.symmetric(
-                              horizontal: 18.0, vertical: 8.0),
-                          decoration: BoxDecoration(
-                            border:
-                                Border.all(color: Colors.grey.withOpacity(0.4)),
-                          ),
-                          child: const Center(
-                            child: Text(
-                              'No data found',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                          );
+                        }
+                      },
+                    ),
+                  ],
+                ),
               ),
             ],
           );

@@ -430,7 +430,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           'last_name': textFieldValues[1],
           'gender': selectedRole,
           'age': age,
-          'marital_status': textFieldValues[4],
+          'marital_status': selectedStatus,
           'uan': uan,
           'pan': pan,
           'working_phone': worknum,

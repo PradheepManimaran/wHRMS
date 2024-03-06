@@ -326,3 +326,82 @@
 //     }
 //   }
 // }
+
+import 'package:flutter/material.dart';
+import 'package:wHRMS/objects/education.dart';
+import 'package:wHRMS/objects/familyObject.dart';
+import 'package:wHRMS/objects/personal.dart';
+import 'package:wHRMS/objects/profile_field.dart';
+import 'package:wHRMS/objects/work_experience.dart';
+
+class DataInitializer {
+  static Future<List<EmployeeName>> fetchEmployeeData(
+      BuildContext context) async {
+    try {
+      List<EmployeeName> data =
+          await EmployeeModel.fetchEmployeeProfile(context);
+      print('Employee data: $data');
+      return data;
+    } catch (e) {
+      print('Error fetching employee data: $e');
+      return [];
+    }
+  }
+
+  static Future<List<EmployeesField>> fetchEmployeeProfile() async {
+    try {
+      List<EmployeesField> profile = await EmployeeApiProfile.fetchEmployee();
+      print('Employee profile: $profile');
+      return profile;
+    } catch (e) {
+      print('Error fetching employee profile: $e');
+      return [];
+    }
+  }
+
+  // static Future<List<Employe>> fetchEmployeeAge() async {
+  //   try {
+
+  //     print('Employee age: $age');
+  //     return age;
+  //   } catch (e) {
+  //     print('Error fetching employee age: $e');
+  //     return [];
+  //   }
+  // }
+
+  static Future<List<WorkExperience>> fetchWorkData() async {
+    try {
+      List<WorkExperience> workData = await workProfile.fetchWorkExperience();
+      print('Work data: $workData');
+      print('Response : $WorkExperience');
+      return workData;
+    } catch (e) {
+      print('Error fetching work data: $e');
+      return [];
+    }
+  }
+
+  static Future<List<FamilyDetails>> fetchFamilyDetails() async {
+    try {
+      List<FamilyDetails> familyDetails = await FamilyApiHandler.fetchFamily();
+      print('Family details: $familyDetails');
+      return familyDetails;
+    } catch (e) {
+      print('Error fetching family details: $e');
+      return [];
+    }
+  }
+
+  static Future<List<EducationDetails>> fetchEducationData() async {
+    try {
+      List<EducationDetails> educationData =
+          await EducationProfile.fetchEducationData();
+      print('Education data: $educationData');
+      return educationData;
+    } catch (e) {
+      print('Error fetching education data: $e');
+      return [];
+    }
+  }
+}
