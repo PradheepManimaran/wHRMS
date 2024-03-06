@@ -1,12 +1,11 @@
 import 'dart:convert';
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
 import 'package:wHRMS/View/apply_leave.dart';
 import 'package:http/http.dart' as http;
 import 'package:wHRMS/apiHandlar/baseUrl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shimmer/shimmer.dart';
 
 class LeaveList extends StatefulWidget {
   const LeaveList({super.key});
@@ -16,7 +15,7 @@ class LeaveList extends StatefulWidget {
 }
 
 class _LeaveListState extends State<LeaveList> {
-  final Logger _logger = Logger();
+  // final Logger _logger = Logger();
   List<Employees> employees = [];
 
   bool isLoading = true;
@@ -42,8 +41,8 @@ class _LeaveListState extends State<LeaveList> {
         },
       );
 
-      _logger.d('User Status Code: ${response.statusCode}');
-      _logger.d('Testing User Body: ${response.body}');
+      // _logger.d('User Status Code: ${response.statusCode}');
+      // _logger.d('Testing User Body: ${response.body}');
 
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
@@ -54,17 +53,26 @@ class _LeaveListState extends State<LeaveList> {
           setState(() {
             // Assuming profile_picture_url is the key in your API response
             profile_picture = firstItem['profile_picture'] ?? '';
-            _logger.d('Testing User: $firstItem');
+            // _logger.d('Testing User: $firstItem');
           });
         } else {
-          print('Empty response');
+          if (kDebugMode) {
+            print('Empty response');
+          }
         }
       } else {
-        print('Failed to load Image data. Status code: ${response.statusCode}');
-        print('Response body: ${response.body}');
+        // if (kDebugMode) {
+        //   print(
+        //       'Failed to load Image data. Status code: ${response.statusCode}');
+        // }
+        // if (kDebugMode) {
+        //   print('Response body: ${response.body}');
+        // }
       }
     } catch (e) {
-      print('Error loading image data: $e');
+      // if (kDebugMode) {
+      //   print('Error loading image data: $e');
+      // }
     }
   }
 
@@ -81,33 +89,53 @@ class _LeaveListState extends State<LeaveList> {
         },
       );
 
-      print('Response body: ${response.body}');
+      // if (kDebugMode) {
+      //   print('Response body: ${response.body}');
+      // }
 
       if (response.statusCode == 200) {
         final dynamic data = jsonDecode(response.body);
 
         if (data is List) {
+          // Filter out leave dates that are in the past
+          DateTime currentDate = DateTime.now();
+          List<Employees> filteredEmployees = data
+              .map((item) => Employees.fromJson(item))
+              .where((employee) =>
+                  DateTime.parse(employee.endDate).isAfter(currentDate))
+              .toList();
+
           setState(() {
-            employees = data.map((item) => Employees.fromJson(item)).toList();
-            isLoading = false; // Set isLoading to false after data is fetched
+            employees = filteredEmployees;
+            isLoading = false;
           });
-          print('Testing : ${response.body}');
+          // if (kDebugMode) {
+          //   print('Testing : ${response.body}');
+          // }
         } else if (data is Map<String, dynamic>) {
           // Single employee case
           setState(() {
             employees = [Employees.fromJson(data)];
-            isLoading = false; // Set isLoading to false after data is fetched
+            isLoading = false;
           });
         } else {
-          print('Unexpected response format');
+          // if (kDebugMode) {
+          //   print('Unexpected response format');
+          // }
         }
       } else {
-        print(
-            'Failed to load employee data. Status code: ${response.statusCode}');
-        print('Response body: ${response.body}');
+        // if (kDebugMode) {
+        //   print(
+        //       'Failed to load employee data. Status code: ${response.statusCode}');
+        // }
+        // if (kDebugMode) {
+        //   print('Response body: ${response.body}');
+        // }
       }
     } catch (e) {
-      print('Error loading employee data: $e');
+      // if (kDebugMode) {
+      //   print('Error loading employee data: $e');
+      // }
     }
   }
 
@@ -160,7 +188,19 @@ class _LeaveListState extends State<LeaveList> {
             ),
             const SizedBox(height: 10),
             isLoading
-                ? _buildShimmerLoading()
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(height: 10.0),
+                      _buildShimmerLoading(),
+                      // _buildShimmerLoading(),
+                      // _buildShimmerLoading(),
+                      // _buildShimmerLoading(),
+                      // _buildShimmerLoading(),
+                      // _buildShimmerLoading(),
+                    ],
+                  )
                 : Center(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -186,59 +226,47 @@ class _LeaveListState extends State<LeaveList> {
   }
 
   Widget _buildShimmerLoading() {
-    return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
-      period: Duration(seconds: 30),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            height: 120,
-            child: Card(
-              elevation: 1,
-              margin: const EdgeInsets.symmetric(vertical: 5),
-              child: Row(
-                children: [
-                  const SizedBox(
-                    width: 120,
-                    child: CircleAvatar(
-                      backgroundColor: Colors.blue,
-                      radius: 40,
-                    ),
-                  ),
-                  Expanded(
-                    child: ListTile(
-                      title: Container(
-                        color: Colors.white,
-                        height: 16,
-                      ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            color: Colors.white,
-                            height: 16,
-                          ),
-                          Container(
-                            color: Colors.white,
-                            height: 16,
-                          ),
-                          Container(
-                            color: Colors.white,
-                            height: 16,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+    return SizedBox(
+      height: 120,
+      child: Card(
+        elevation: 1,
+        margin: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 120,
+              child: CircleAvatar(
+                backgroundColor: Colors.grey[100]!,
+                radius: 40,
               ),
             ),
-          ),
-          // Add more shimmer loading widgets as needed
-        ],
+            Expanded(
+              child: ListTile(
+                title: Container(
+                  color: Colors.white,
+                  height: 16,
+                ),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      color: Colors.white,
+                      height: 16,
+                    ),
+                    Container(
+                      color: Colors.white,
+                      height: 14,
+                    ),
+                    Container(
+                      color: Colors.white,
+                      height: 14,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -256,7 +284,7 @@ class Employees {
 
   factory Employees.fromJson(Map<String, dynamic> json) {
     return Employees(
-      json['leave_by_approved_status'].toString(),
+      json['approved'].toString(),
       json['start_date'].toString(),
       json['end_date'].toString(),
       json['reason_type'].toString(),
@@ -271,19 +299,17 @@ class EmployeeListItemCard extends StatelessWidget {
   String? profile_picture;
 
   EmployeeListItemCard({
+    super.key,
     required this.employee,
     required this.profile_picture,
   });
 
   @override
   Widget build(BuildContext context) {
-    String _prependBaseUrl(String url) {
-      return '$url';
-    }
-
-    return Card(
-      elevation: 1,
-      margin: const EdgeInsets.symmetric(vertical: 5),
+    return Container(
+      decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.withOpacity(0.4)),
+          borderRadius: BorderRadius.circular(7)),
       child: SizedBox(
         // height: 120,
         child: Row(

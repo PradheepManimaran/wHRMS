@@ -38,7 +38,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   TextEditingController presentStateController = TextEditingController();
   TextEditingController presentCountryController = TextEditingController();
   TextEditingController presentPinCodeController = TextEditingController();
-  // TextEditingController pincodeController = TextEditingController();
+  String? selectedCountry;
+  String? selectedState;
+  String? selectedCity;
 
   //permanet address Controller's
   TextEditingController permanentAddressLine1Controller =
@@ -49,19 +51,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   TextEditingController permanentStateController = TextEditingController();
   TextEditingController permanentCountryController = TextEditingController();
   TextEditingController permanentPinCodeController = TextEditingController();
+
   //Contact Details Controller's
   TextEditingController workNumberController = TextEditingController();
   TextEditingController personalNumberController = TextEditingController();
   TextEditingController personalEmailController = TextEditingController();
-  String? selectedCountry; // Added this line for the selected country
-  String? selectedState;
-  String? selectedCity;
-  String? pinCode;
-  //Date Controller's
 
+  // String? pinCode;
+
+  //Date Controller's
   TextEditingController fromDateController = TextEditingController();
   TextEditingController toDateController = TextEditingController();
-  // TextEditingController completionDateController = TextEditingController();
 
   //Work Experience Controller's
   TextEditingController companynameController = TextEditingController();
@@ -206,7 +206,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   LinearProgressIndicator(
                     value: completionPercentage / 100,
                     backgroundColor: Colors.green[300],
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                    valueColor:
+                        const AlwaysStoppedAnimation<Color>(ThemeColor.app_bar),
                   ),
                   const SizedBox(height: 15.0),
                   Text(
@@ -219,34 +220,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   // const SizedBox(height: 15.0),
                   _buildProfileFields(),
                   const SizedBox(height: 30),
-                  // Align(
-                  //   alignment: Alignment.bottomCenter,
-                  //   child: SizedBox(
-                  //     width: 340.0,
-                  //     height: 60.0,
-                  //     child: ElevatedButton(
-                  //       onPressed: () {
-                  //         if (_formKey.currentState!.validate()) {
-                  //           _nextSection();
-                  //         }
-                  //       },
-                  //       style: ElevatedButton.styleFrom(
-                  //         shape: RoundedRectangleBorder(
-                  //           borderRadius: BorderRadius.circular(6.0),
-                  //         ),
-                  //         backgroundColor: ThemeColor.btn_color,
-                  //       ),
-                  //       child: Text(
-                  //         isLastSection ? 'Submit' : 'Next',
-                  //         style: const TextStyle(
-                  //           color: Colors.white,
-                  //           fontWeight: FontWeight.bold,
-                  //           fontSize: 20,
-                  //         ),
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
                   bottomNavigationButtons(),
                 ],
               ),
@@ -348,13 +321,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return [
       firstNameController.text,
       lastNameController.text,
-      // selectedRole ?? '',
-      // selectedStatus ?? '',
       uanController.text,
       panController.text,
-      // workNumberController.text,
-      // personalNumberController.text,
-      // personalEmailController.text,
       presentAddressLine1Controller.text,
       presentAddressLine2Controller.text,
       presentCityController.text,
@@ -462,7 +430,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           'last_name': textFieldValues[1],
           'gender': selectedRole,
           'age': age,
-          'marital_status': textFieldValues[4],
+          'marital_status': selectedStatus,
           'uan': uan,
           'pan': pan,
           'working_phone': worknum,
@@ -700,8 +668,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             String? imagePath = await _pickImage(aadharCardController);
             if (imagePath != null) {
               setState(() {
-                adharCardImage = File(
-                    imagePath); // Convert file path to File object if necessary
+                adharCardImage = File(imagePath);
               });
             }
           },
@@ -716,8 +683,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             String? imagePath = await _pickImage(photoController);
             if (imagePath != null) {
               setState(() {
-                profilePictureImage = File(
-                    imagePath); // Convert file path to File object if necessary
+                profilePictureImage = File(imagePath);
               });
             }
           },
@@ -739,15 +705,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
       controller: controller,
       decoration: InputDecoration(
         hintText: hintText,
-        enabledBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.grey),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.grey.withOpacity(0.5)),
+          borderRadius: BorderRadius.circular(7),
         ),
-        focusedBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.grey),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.grey.withOpacity(0.5)),
+          borderRadius: BorderRadius.circular(7),
         ),
         prefixIcon: Icon(prefixIconData),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(7),
           borderSide: const BorderSide(
             color: Colors.grey,
             width: 2.0,
@@ -759,31 +727,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       readOnly: isButton,
       onTap: onTap,
-    );
-  }
-
-  Widget _buildTextFields({
-    required TextEditingController controller,
-    String hintText = 'Enter text here',
-    IconData? prefixIconData,
-  }) {
-    return Center(
-      child: TextField(
-        controller: controller,
-        decoration: InputDecoration(
-          hintText: hintText,
-          prefixIcon: Icon(prefixIconData),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(6),
-            borderSide: const BorderSide(
-              color: Colors.black,
-              width: 2.0,
-            ),
-          ),
-          filled: true,
-          fillColor: ThemeColor.TextFieldColor,
-        ),
-      ),
     );
   }
 
@@ -883,6 +826,64 @@ class _ProfileScreenState extends State<ProfileScreen> {
           fieldName: 'Pin Code',
         ),
         const SizedBox(height: 15),
+        // CSCPicker(
+        //   showStates: true,
+        //   showCities: true,
+        //   flagState: CountryFlag.DISABLE,
+        //   dropdownDecoration: BoxDecoration(
+        //     borderRadius: const BorderRadius.all(Radius.circular(3)),
+        //     color: Colors.grey.withOpacity(0),
+        //     border: Border.all(
+        //       color: Colors.grey.withOpacity(0.5),
+        //       width: 1.0,
+        //     ),
+        //   ),
+        //   disabledDropdownDecoration: BoxDecoration(
+        //     borderRadius: const BorderRadius.all(Radius.circular(3)),
+        //     color: Colors.grey.withOpacity(0.0),
+        //     border: Border.all(
+        //       color: Colors.grey.withOpacity(0.5),
+        //       width: 1.0,
+        //     ),
+        //   ),
+        //   countrySearchPlaceholder: "Country",
+        //   stateSearchPlaceholder: "State",
+        //   citySearchPlaceholder: "City",
+        //   countryDropdownLabel: "Country",
+        //   stateDropdownLabel: "State",
+        //   cityDropdownLabel: "City",
+        //   selectedItemStyle: TextStyle(
+        //     height: 3,
+        //     color: Colors.black.withOpacity(0.7),
+        //     fontSize: 14,
+        //   ),
+        //   dropdownHeadingStyle: const TextStyle(
+        //     color: Colors.black,
+        //     fontSize: 17,
+        //     fontWeight: FontWeight.bold,
+        //   ),
+        //   dropdownItemStyle: const TextStyle(
+        //     color: Colors.black,
+        //     fontSize: 14,
+        //   ),
+        //   dropdownDialogRadius: 10.0,
+        //   searchBarRadius: 10.0,
+        //   onCountryChanged: (value) {
+        //     setState(() {
+        //       selectedCountry = value;
+        //     });
+        //   },
+        //   onStateChanged: (value) {
+        //     setState(() {
+        //       selectedState = value;
+        //     });
+        //   },
+        //   onCityChanged: (value) {
+        //     setState(() {
+        //       selectedCity = value;
+        //     });
+        //   },
+        // ),
         Row(
           children: [
             const Align(
@@ -924,6 +925,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         } else {
                           permanentAddressLine1Controller.clear();
                           permanentAddressLine2Controller.clear();
+                          // selectedCity = null;
+                          // selectedState = null;
+                          // selectedCountry = null;
                           permanentCityController.clear();
                           permanentStateController.clear();
                           permanentCountryController.clear();
@@ -983,6 +987,65 @@ class _ProfileScreenState extends State<ProfileScreen> {
           prefixIconData: Icons.pin,
           fieldName: 'Pin Code',
         ),
+        // const SizedBox(height: 15),
+        // CSCPicker(
+        //   showStates: true,
+        //   showCities: true,
+        //   flagState: CountryFlag.DISABLE,
+        //   dropdownDecoration: BoxDecoration(
+        //     borderRadius: const BorderRadius.all(Radius.circular(3)),
+        //     color: Colors.grey.withOpacity(0),
+        //     border: Border.all(
+        //       color: Colors.grey.withOpacity(0.5),
+        //       width: 1.0,
+        //     ),
+        //   ),
+        //   disabledDropdownDecoration: BoxDecoration(
+        //     borderRadius: const BorderRadius.all(Radius.circular(3)),
+        //     color: Colors.grey.withOpacity(0.0),
+        //     border: Border.all(
+        //       color: Colors.grey.withOpacity(0.5),
+        //       width: 1.0,
+        //     ),
+        //   ),
+        //   countrySearchPlaceholder: "Country",
+        //   stateSearchPlaceholder: "State",
+        //   citySearchPlaceholder: "City",
+        //   countryDropdownLabel: "Country",
+        //   stateDropdownLabel: "State",
+        //   cityDropdownLabel: "City",
+        //   selectedItemStyle: TextStyle(
+        //     height: 3,
+        //     color: Colors.black.withOpacity(0.7),
+        //     fontSize: 17,
+        //   ),
+        //   dropdownHeadingStyle: const TextStyle(
+        //     color: Colors.black,
+        //     fontSize: 17,
+        //     fontWeight: FontWeight.bold,
+        //   ),
+        //   dropdownItemStyle: const TextStyle(
+        //     color: Colors.black,
+        //     fontSize: 17,
+        //   ),
+        //   dropdownDialogRadius: 10.0,
+        //   searchBarRadius: 10.0,
+        //   onCountryChanged: (value) {
+        //     setState(() {
+        //       selectedCountry = value;
+        //     });
+        //   },
+        //   onStateChanged: (value) {
+        //     setState(() {
+        //       selectedState = value;
+        //     });
+        //   },
+        //   onCityChanged: (value) {
+        //     setState(() {
+        //       selectedCity = value;
+        //     });
+        //   },
+        // ),
       ],
     );
   }
@@ -1284,11 +1347,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
         decoration: InputDecoration(
           hintText: hintText,
           prefixIcon: Icon(prefixIconData),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(7),
+            borderSide: BorderSide(color: Colors.grey.withOpacity(0.5)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.grey.withOpacity(0.5)),
+            borderRadius: BorderRadius.circular(7),
+          ),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(6),
+            borderRadius: BorderRadius.circular(7),
             borderSide: const BorderSide(
-              color: Colors.black,
-              width: 2.0,
+              // color: Colors.black,
+              width: 1.0,
             ),
           ),
           filled: true,
@@ -1316,14 +1387,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: TextFormField(
         controller: controller,
         inputFormatters: [LengthLimitingTextInputFormatter(10)],
+        keyboardType: TextInputType.number,
         decoration: InputDecoration(
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.grey.withOpacity(0.5)),
+            borderRadius: BorderRadius.circular(7),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.grey.withOpacity(0.5)),
+            borderRadius: BorderRadius.circular(7),
+          ),
           hintText: hintText,
           prefixIcon: Icon(prefixIconData),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(6),
+            borderRadius: BorderRadius.circular(1),
             borderSide: const BorderSide(
-              color: Colors.black,
-              width: 2.0,
+              // color: Colors.black,
+              width: 1.0,
             ),
           ),
           filled: true,
@@ -1351,6 +1431,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Icons.date_range,
           ),
           hintText: hintText,
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.grey.withOpacity(0.5)),
+            borderRadius: BorderRadius.circular(7),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.grey.withOpacity(0.5)),
+            borderRadius: BorderRadius.circular(7),
+          ),
           labelStyle: const TextStyle(fontSize: 10),
           border: const OutlineInputBorder(),
           filled: true,
@@ -1401,6 +1489,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           return null;
         },
         decoration: InputDecoration(
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.grey.withOpacity(0.5)),
+            borderRadius: BorderRadius.circular(7),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.grey.withOpacity(0.5)),
+            borderRadius: BorderRadius.circular(7),
+          ),
           prefix: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: SizedBox(
@@ -1440,6 +1536,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }).toList(),
       onChanged: onChanged,
       decoration: InputDecoration(
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.grey.withOpacity(0.5)),
+          borderRadius: BorderRadius.circular(7),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.grey.withOpacity(0.5)),
+          borderRadius: BorderRadius.circular(7),
+        ),
         hintText: hintText,
         prefixIcon: Icon(prefixIconData),
         border: OutlineInputBorder(),
@@ -1465,22 +1569,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
           filled: true,
           fillColor: ThemeColor.TextFieldColor,
           enabledBorder: OutlineInputBorder(
-            borderSide: const BorderSide(
-              color: Colors.grey,
+            borderSide: BorderSide(
+              color: Colors.grey.withOpacity(0.5),
               width: 1.0,
             ),
-            borderRadius: BorderRadius.circular(5.0),
+            borderRadius: BorderRadius.circular(7.0),
           ),
           focusedBorder: OutlineInputBorder(
-            borderSide: const BorderSide(
-              color: Colors.grey,
+            borderSide: BorderSide(
+              color: Colors.grey.withOpacity(0.5),
               width: 1.0,
             ),
-            borderRadius: BorderRadius.circular(5.0),
+            borderRadius: BorderRadius.circular(7.0),
           ),
           border: OutlineInputBorder(
             borderSide: BorderSide.none,
-            borderRadius: BorderRadius.circular(5.0),
+            borderRadius: BorderRadius.circular(7.0),
           ),
           prefixIcon: Icon(prefixIconData),
         ),
@@ -1524,11 +1628,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
           hintText: hintText,
           labelStyle: const TextStyle(fontSize: 10),
           border: const OutlineInputBorder(),
-          enabledBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.grey),
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.grey.withOpacity(0.5)),
+            borderRadius: BorderRadius.circular(7),
           ),
-          focusedBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.grey),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.grey.withOpacity(0.5)),
+            borderRadius: BorderRadius.circular(7),
           ),
           filled: true,
           fillColor: ThemeColor.TextFieldColor,
@@ -1566,17 +1672,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
         labelText: fieldName,
         prefixIcon: Icon(prefixIconData),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(6),
-          borderSide: const BorderSide(
-            color: Colors.grey,
-            width: 2.0,
+          borderRadius: BorderRadius.circular(7),
+          borderSide: BorderSide(
+            color: Colors.grey.withOpacity(0.5),
+            width: 1.0,
           ),
         ),
-        enabledBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.grey),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.grey.withOpacity(0.5)),
+          borderRadius: BorderRadius.circular(7),
         ),
-        focusedBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.grey),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.grey.withOpacity(0.5)),
+          borderRadius: BorderRadius.circular(7),
         ),
         filled: true,
         fillColor: Colors.white,

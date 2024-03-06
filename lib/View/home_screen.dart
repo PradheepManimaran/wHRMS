@@ -6,12 +6,17 @@ import 'package:wHRMS/View/adminleavelist.dart';
 import 'package:wHRMS/View/attenance.dart';
 import 'package:wHRMS/View/customnav.dart';
 import 'package:wHRMS/View/dashboard.dart';
-import 'package:wHRMS/View/employee_form.dart';
 import 'package:wHRMS/View/employee_profile.dart';
 import 'package:wHRMS/View/leave_list.dart';
 import 'package:wHRMS/apiHandlar/baseUrl.dart';
+import 'package:wHRMS/apiHandlar/profileApi.dart';
 import 'package:wHRMS/login/login.dart';
 import 'package:http/http.dart' as http;
+import 'package:wHRMS/objects/education.dart';
+import 'package:wHRMS/objects/familyObject.dart';
+import 'package:wHRMS/objects/personal.dart';
+import 'package:wHRMS/objects/profile_field.dart';
+import 'package:wHRMS/objects/work_experience.dart';
 import 'package:wHRMS/pages/departmentScreen.dart';
 import 'package:wHRMS/pages/designation.dart';
 import 'package:wHRMS/pages/enroll_status.dart';
@@ -33,7 +38,14 @@ class _HomeScreen extends State<HomeScreen> {
   int _selectedIndex = 0;
   bool _isSuperuser = false;
   EmployeeScreen employeForm = EmployeeScreen();
-
+  // List<EmployeeName> employeeData = [];
+  List<EmployeesField> employeeProfile = [];
+  // List<Employe> daage = [];
+  List<WorkExperience> work = [];
+  List<FamilyDetails> familyDetails = [];
+  List<EducationDetails> education = [];
+  bool isLoading = true;
+  // EmployeeModel.employee;
   // late List<Widget> _widgetOptions;
 
   // final List<Widget> _widgetOptions = <Widget>[
@@ -54,18 +66,94 @@ class _HomeScreen extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadIsSuperuser();
-
-    //  _loadIsSuperuser();
-
-    // _widgetOptions = [
-    //   const Dashboard(),
-    //   if {(_isSuperuser) const EmployeeScreen(),}
-    //   else { const AttendanceScreen(),}
-    //   const LeaveList(),
-    //   const EmployeeProfile(),
-    //   // if (!_isSuperuser) const AttendanceScreen(),
-    // ];
+    _initData();
   }
+
+  void _initData() async {
+    try {
+      EmployeeModel.fetchEmployeeProfile(context);
+      EmployeeApiProfile.fetchEmployee();
+      // DataInitializer.fetchEmployeeData();
+      DataInitializer.fetchEmployeeProfile();
+      // DataInitializer.fetchEmployeeAge();
+      // DataInitializer.fetchWorkData();
+      DataInitializer.fetchFamilyDetails();
+      DataInitializer.fetchEducationData();
+      workProfile.fetchWorkExperience();
+
+      // setState(() {
+      //   this.employeeData = employeeData;
+      //   isLoading = false;
+      //   this.employeeProfile = employeeProfile;
+      //   this.daage = daage;
+      //   this.work = work;
+      //   this.familyDetails = familyDetails;
+      //   this.education = education;
+      // });
+    } catch (e) {
+      print('Error initializing data: $e');
+      // Handle error, show error message, etc.
+    }
+  }
+
+  // Future<void> initAuthToken() async {
+  //   try {
+  //     List<EmployeeName> data = await EmployeeModel.fetchEmployeeProfile();
+  //     setState(() {
+  //       employeeData = data;
+  //       isLoading = false;
+  //     });
+  //   } catch (e) {
+  //     print('Error fetching employee data: $e');
+  //   }
+
+  //   try {
+  //     List<EmployeesField> employeeData =
+  //         await EmployeeApiProfile.fetchEmployee();
+  //     setState(() {
+  //       employeeProfile = employeeData;
+  //     });
+
+  //     List<Employe> age =
+  //         (await EmployeeApiProfile.fetchEmployee()).cast<Employe>();
+
+  //     setState(() {
+  //       daage = age;
+  //     });
+  //   } catch (e) {
+  //     print('Error fetching employee data: $e');
+  //   }
+
+  //   try {
+  //     work = await workProfile.fetchWorkExperience();
+  //     setState(() {
+  //       work = work;
+  //       isLoading = false;
+  //     });
+  //   } catch (e) {
+  //     print('Error fetching Work data: $e');
+  //   }
+
+  //   try {
+  //     familyDetails = await FamilyApiHandler.fetchFamily();
+  //     setState(() {
+  //       familyDetails = familyDetails;
+  //       isLoading = false;
+  //     });
+  //   } catch (e) {
+  //     print('Error fetching Family Details data: $e');
+  //   }
+
+  //   try {
+  //     education = await EducationProfile.fetchEducationData();
+  //     setState(() {
+  //       education = education;
+  //       isLoading = false;
+  //     });
+  //   } catch (e) {
+  //     print('Error fetching Education data: $e');
+  //   }
+  // }
 
   List<Widget> _widgetOptions(bool isSuperuser) {
     if (isSuperuser) {
@@ -129,10 +217,15 @@ class _HomeScreen extends State<HomeScreen> {
             builder: (context) => const UserLoginScreen(),
           ),
         );
-      } else {
-        // Handle errors or unexpected responses here
-        print('Failed to logout. Status code: ${response.statusCode}');
-
+      } else if (response.statusCode == 400) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.green,
+            content: Text('Logged out successfully.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      } else if (response.statusCode == 401) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             backgroundColor: Colors.green,
@@ -141,10 +234,7 @@ class _HomeScreen extends State<HomeScreen> {
           ),
         );
       }
-    } catch (error) {
-      // Handle network errors or exceptions here
-      print('Error during logout: $error');
-    }
+    } catch (error) {}
   }
 
   void remove() async {
@@ -152,8 +242,8 @@ class _HomeScreen extends State<HomeScreen> {
 
     prefs.remove('token');
 
-    print('Logged out');
-    print('Token after logout: ${prefs.getString('token')}');
+    // print('Logged out');
+    // print('Token after logout: ${prefs.getString('token')}');
 
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
@@ -376,7 +466,7 @@ class _HomeScreen extends State<HomeScreen> {
                     // Navigator.push(
                     //   context,
                     //   MaterialPageRoute(
-                    //     builder: ((context) => const RoleScreen()),
+                    //     builder: ((context) => DarkLightModeScreen()),
                     //   ),
                     // );
                   },

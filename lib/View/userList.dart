@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:wHRMS/Components/employees.dart';
+import 'package:http/http.dart' as http;
 import 'package:wHRMS/Components/information_widget.dart';
 import 'package:wHRMS/ThemeColor/theme.dart';
+import 'package:wHRMS/objects/adminemployee.dart';
 
 class UserListScreen extends StatefulWidget {
   final Employee employee;
@@ -18,6 +19,34 @@ class UserListScreen extends StatefulWidget {
 class _UserListScreenState extends State<UserListScreen> {
   final double cover = 130.0;
   final double img = 130.0;
+
+  Future<void> deleteData(int tableId) async {
+    final String apiUrl =
+        'https://pradheepmaniamaran.pythonanywhere.com/api/users/$tableId';
+
+    try {
+      final response = await http.delete(
+        Uri.parse(apiUrl),
+        // Add any necessary headers here, such as authorization headers
+      );
+
+      if (response.statusCode == 200) {
+        // Successful deletion
+        print('Data deleted successfully');
+      } else if (response.statusCode == 400) {
+        // Failed to delete data
+        print('Failed to delete data. Status code: ${response.statusCode}');
+        print('Response body: ${response.body}');
+      } else if (response.statusCode == 500) {
+        print('Response body: ${response.body}');
+        print('Failed to delete data. Status code: ${response.statusCode}');
+        print('Response Table ID: $tableId');
+      }
+    } catch (error) {
+      print('Error deleting data: $error');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final double top = cover - img / 2;
@@ -25,7 +54,7 @@ class _UserListScreenState extends State<UserListScreen> {
         ? widget.employee.userProfilePicture[0].profilePicture
         : null;
 
-    print('Profile Picture URL: $profilePictureUrl');
+    // print('Profile Picture URL: $profilePictureUrl');
 
     return Scaffold(
       appBar: AppBar(
@@ -86,31 +115,51 @@ class _UserListScreenState extends State<UserListScreen> {
                   fontSize: 16,
                 ),
               ),
-              const SizedBox(height: 20),
-              TextWithPadding(
-                label: 'Name:',
-                value: widget.employee.username,
+              // const SizedBox(height: 20),
+              Column(
+                children: [
+                  Container(
+                    margin: const EdgeInsets.symmetric(
+                        horizontal: 18.0, vertical: 8.0),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.withOpacity(0.4)),
+                      borderRadius: BorderRadius.circular(7),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TextWithPadding(
+                          label: 'Employee Id',
+                          value: widget.employee.employeeId,
+                        ),
+                        TextWithPadding(
+                          label: 'Name',
+                          value: widget.employee.username,
+                        ),
+                        TextWithPadding(
+                          label: 'Email',
+                          value: widget.employee.email,
+                        ),
+                        TextWithPadding(
+                          label: 'Role',
+                          value: widget.employee.role.toString(),
+                        ),
+                        TextWithPadding(
+                          label: 'Phone Number',
+                          value: widget.employee.phoneNumber,
+                        ),
+                        const SizedBox(height: 15),
+                        TextWithPadding(
+                          label: 'Date Of Joining',
+                          value: widget.employee.dateOfJoining,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              // const SizedBox(height: 15),
-              TextWithPadding(
-                label: 'Email:',
-                value: widget.employee.email,
-              ),
-              TextWithPadding(
-                label: 'Role:',
-                value: widget.employee.role.toString(),
-              ),
-              // const SizedBox(height: 15),
-              TextWithPadding(
-                label: 'Phone Number:',
-                value: widget.employee.phoneNumber,
-              ),
-              const SizedBox(height: 15),
-              TextWithPadding(
-                label: 'Date Of Joining:',
-                value: widget.employee.dateOfJoining,
-              ),
-              const SizedBox(height: 20),
+
+              // const SizedBox(height: 20),
               const Text(
                 'Work Experience',
                 style: TextStyle(
@@ -118,43 +167,57 @@ class _UserListScreenState extends State<UserListScreen> {
                   fontSize: 16,
                 ),
               ),
-              const SizedBox(height: 20),
+              // const SizedBox(height: 20),
               // Iterate over each work experience and display it
               Column(
                 children: widget.employee.workExperience.map((experience) {
-                  return Card(
-                    // margin:
-                    //     const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                    // child: Padding(
-                    //   padding: const EdgeInsets.all(16),
-                    color: Colors.white,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        TextWithPadding(
-                          label: 'Company Name:',
-                          value: experience.companyName,
+                  return Stack(
+                    children: [
+                      // Container(
+                      //   decoration: BoxDecoration(
+                      //     border:
+                      //         Border.all(color: Colors.grey.withOpacity(0.4)),
+                      //     borderRadius: BorderRadius.circular(7),
+                      //   ),
+                      // ),
+                      Container(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 18.0, vertical: 8.0),
+                        decoration: BoxDecoration(
+                          border:
+                              Border.all(color: Colors.grey.withOpacity(0.4)),
+                          borderRadius: BorderRadius.circular(7),
                         ),
-                        TextWithPadding(
-                          label: 'Designation: ',
-                          value: experience.designation,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            TextWithPadding(
+                              label: 'Company Name',
+                              value: experience.companyName,
+                            ),
+                            TextWithPadding(
+                              label: 'Designation',
+                              value: experience.designation,
+                            ),
+                            TextWithPadding(
+                                label: 'From Date', value: experience.fromDate),
+                            TextWithPadding(
+                              label: 'To Date',
+                              value: experience.toDate,
+                            ),
+                            TextWithPadding(
+                              label: 'Description',
+                              value: experience.description,
+                            ),
+                          ],
                         ),
-                        TextWithPadding(
-                            label: 'From Date:  ', value: experience.fromDate),
-                        TextWithPadding(
-                          label: 'To Date:',
-                          value: experience.toDate,
-                        ),
-                        TextWithPadding(
-                          label: 'Description: ',
-                          value: experience.description,
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   );
                 }).toList(),
               ),
-              const SizedBox(height: 20),
+              // const SizedBox(height: 20),
+
               const Text(
                 'Education Information',
                 style: TextStyle(
@@ -162,36 +225,38 @@ class _UserListScreenState extends State<UserListScreen> {
                   fontSize: 16,
                 ),
               ),
-              const SizedBox(height: 20),
+              // const SizedBox(height: 20),
               Column(
                 children: widget.employee.education.map((experience) {
-                  return Card(
-                    // margin:
-                    //     const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                    // child: Padding(
-                    //   padding: const EdgeInsets.all(16),
-                    color: Colors.white,
+                  return Container(
+                    margin: const EdgeInsets.symmetric(
+                        horizontal: 18.0, vertical: 8.0),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.withOpacity(0.4)),
+                      borderRadius: BorderRadius.circular(7),
+                    ),
+                    // color: Colors.white,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         TextWithPadding(
-                          label: 'University Name:',
+                          label: 'University Name',
                           value: experience.universityName,
                         ),
                         TextWithPadding(
-                          label: 'Degree: ',
+                          label: 'Degree',
                           value: experience.degree,
                         ),
                         TextWithPadding(
-                          label: 'Specialization:',
+                          label: 'Specialization',
                           value: experience.specialization,
                         ),
                         TextWithPadding(
-                          label: 'CGPA: ',
+                          label: 'CGPA',
                           value: experience.cgpa,
                         ),
                         TextWithPadding(
-                          label: 'complete Year:',
+                          label: 'complete Year',
                           value: experience.completeyear,
                         ),
                       ],
@@ -199,6 +264,38 @@ class _UserListScreenState extends State<UserListScreen> {
                   );
                 }).toList(),
               ),
+              const SizedBox(height: 15),
+              Container(
+                margin:
+                    const EdgeInsets.symmetric(horizontal: 18.0, vertical: 8.0),
+                child: Align(
+                  alignment: Alignment.center,
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 60.0,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        deleteData(widget.employee.id);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6.0),
+                        ),
+                        backgroundColor: ThemeColor.app_bar,
+                      ),
+                      child: const Text(
+                        'DELETE',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 15),
             ],
           ),
         ),

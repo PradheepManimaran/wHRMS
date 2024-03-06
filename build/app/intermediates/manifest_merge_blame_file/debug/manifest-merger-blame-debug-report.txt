@@ -1,0 +1,199 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.wesscosoft.wHRMS"
+4    android:versionCode="5"
+5    android:versionName="1.0.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="21"
+9        android:targetSdkVersion="33" />
+10    <!--
+11         The INTERNET permission is required for development. Specifically,
+12         the Flutter tool needs it to communicate with the running application
+13         to allow setting breakpoints, to provide hot reload, etc.
+14    -->
+15    <uses-permission android:name="android.permission.INTERNET" />
+15-->D:\App-Development\wHRMS\android\app\src\main\AndroidManifest.xml:2:5-67
+15-->D:\App-Development\wHRMS\android\app\src\main\AndroidManifest.xml:2:22-64
+16    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+16-->D:\App-Development\wHRMS\android\app\src\main\AndroidManifest.xml:3:5-79
+16-->D:\App-Development\wHRMS\android\app\src\main\AndroidManifest.xml:3:22-76
+17    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+17-->D:\App-Development\wHRMS\android\app\src\main\AndroidManifest.xml:4:5-74
+17-->D:\App-Development\wHRMS\android\app\src\main\AndroidManifest.xml:4:22-72
+18    <uses-permission
+18-->[:file_picker] D:\App-Development\wHRMS\build\file_picker\intermediates\merged_manifest\debug\AndroidManifest.xml:9:5-11:38
+19        android:name="android.permission.READ_EXTERNAL_STORAGE"
+19-->[:file_picker] D:\App-Development\wHRMS\build\file_picker\intermediates\merged_manifest\debug\AndroidManifest.xml:10:9-64
+20        android:maxSdkVersion="32" />
+20-->[:file_picker] D:\App-Development\wHRMS\build\file_picker\intermediates\merged_manifest\debug\AndroidManifest.xml:11:9-35
+21
+22    <queries>
+22-->[:file_picker] D:\App-Development\wHRMS\build\file_picker\intermediates\merged_manifest\debug\AndroidManifest.xml:13:5-19:15
+23        <intent>
+23-->[:file_picker] D:\App-Development\wHRMS\build\file_picker\intermediates\merged_manifest\debug\AndroidManifest.xml:14:9-18:18
+24            <action android:name="android.intent.action.GET_CONTENT" />
+24-->[:file_picker] D:\App-Development\wHRMS\build\file_picker\intermediates\merged_manifest\debug\AndroidManifest.xml:15:13-72
+24-->[:file_picker] D:\App-Development\wHRMS\build\file_picker\intermediates\merged_manifest\debug\AndroidManifest.xml:15:21-69
+25
+26            <data android:mimeType="*/*" />
+26-->[:file_picker] D:\App-Development\wHRMS\build\file_picker\intermediates\merged_manifest\debug\AndroidManifest.xml:17:13-44
+26-->[:file_picker] D:\App-Development\wHRMS\build\file_picker\intermediates\merged_manifest\debug\AndroidManifest.xml:17:19-41
+27        </intent>
+28    </queries>
+29
+30    <uses-permission android:name="android.permission.VIBRATE" />
+30-->[:flutter_local_notifications] D:\App-Development\wHRMS\build\flutter_local_notifications\intermediates\merged_manifest\debug\AndroidManifest.xml:9:5-66
+30-->[:flutter_local_notifications] D:\App-Development\wHRMS\build\flutter_local_notifications\intermediates\merged_manifest\debug\AndroidManifest.xml:9:22-63
+31    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+31-->[:flutter_local_notifications] D:\App-Development\wHRMS\build\flutter_local_notifications\intermediates\merged_manifest\debug\AndroidManifest.xml:10:5-77
+31-->[:flutter_local_notifications] D:\App-Development\wHRMS\build\flutter_local_notifications\intermediates\merged_manifest\debug\AndroidManifest.xml:10:22-74
+32
+33    <permission
+33-->[androidx.core:core:1.10.1] C:\Users\vijay\.gradle\caches\transforms-3\0235b77ff31bafac24f24ba4755d72b8\transformed\core-1.10.1\AndroidManifest.xml:22:5-24:47
+34        android:name="com.wesscosoft.wHRMS.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+34-->[androidx.core:core:1.10.1] C:\Users\vijay\.gradle\caches\transforms-3\0235b77ff31bafac24f24ba4755d72b8\transformed\core-1.10.1\AndroidManifest.xml:23:9-81
+35        android:protectionLevel="signature" />
+35-->[androidx.core:core:1.10.1] C:\Users\vijay\.gradle\caches\transforms-3\0235b77ff31bafac24f24ba4755d72b8\transformed\core-1.10.1\AndroidManifest.xml:24:9-44
+36
+37    <uses-permission android:name="com.wesscosoft.wHRMS.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+37-->[androidx.core:core:1.10.1] C:\Users\vijay\.gradle\caches\transforms-3\0235b77ff31bafac24f24ba4755d72b8\transformed\core-1.10.1\AndroidManifest.xml:26:5-97
+37-->[androidx.core:core:1.10.1] C:\Users\vijay\.gradle\caches\transforms-3\0235b77ff31bafac24f24ba4755d72b8\transformed\core-1.10.1\AndroidManifest.xml:26:22-94
+38
+39    <application
+40        android:name="android.app.Application"
+41        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+41-->[androidx.core:core:1.10.1] C:\Users\vijay\.gradle\caches\transforms-3\0235b77ff31bafac24f24ba4755d72b8\transformed\core-1.10.1\AndroidManifest.xml:28:18-86
+42        android:debuggable="true"
+43        android:enableOnBackInvokedCallback="true"
+44        android:icon="@mipmap/launcher_icon"
+45        android:label="Wessco Employee" >
+46        <activity
+47            android:name="com.wesscosoft.wHRMS.MainActivity"
+48            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+49            android:exported="true"
+50            android:hardwareAccelerated="true"
+51            android:launchMode="singleTop"
+52            android:theme="@style/LaunchTheme"
+53            android:windowSoftInputMode="adjustResize" >
+54
+55            <!--
+56                 Specifies an Android theme to apply to this Activity as soon as
+57                 the Android process has started. This theme is visible to the user
+58                 while the Flutter UI initializes. After that, this theme continues
+59                 to determine the Window background behind the Flutter UI.
+60            -->
+61            <meta-data
+62                android:name="io.flutter.embedding.android.NormalTheme"
+63                android:resource="@style/NormalTheme" />
+64
+65            <intent-filter>
+66                <action android:name="android.intent.action.MAIN" />
+67
+68                <category android:name="android.intent.category.LAUNCHER" />
+69            </intent-filter>
+70        </activity>
+71        <!--
+72             Don't delete the meta-data below.
+73             This is used by the Flutter tool to generate GeneratedPluginRegistrant.java
+74        -->
+75        <meta-data
+76            android:name="flutterEmbedding"
+77            android:value="2" />
+78
+79        <provider
+79-->[:image_picker_android] D:\App-Development\wHRMS\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:10:9-18:20
+80            android:name="io.flutter.plugins.imagepicker.ImagePickerFileProvider"
+80-->[:image_picker_android] D:\App-Development\wHRMS\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:11:13-82
+81            android:authorities="com.wesscosoft.wHRMS.flutter.image_provider"
+81-->[:image_picker_android] D:\App-Development\wHRMS\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:12:13-74
+82            android:exported="false"
+82-->[:image_picker_android] D:\App-Development\wHRMS\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:13:13-37
+83            android:grantUriPermissions="true" >
+83-->[:image_picker_android] D:\App-Development\wHRMS\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:14:13-47
+84            <meta-data
+84-->[:image_picker_android] D:\App-Development\wHRMS\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:15:13-17:75
+85                android:name="android.support.FILE_PROVIDER_PATHS"
+85-->[:image_picker_android] D:\App-Development\wHRMS\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:16:17-67
+86                android:resource="@xml/flutter_image_picker_file_paths" />
+86-->[:image_picker_android] D:\App-Development\wHRMS\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:17:17-72
+87        </provider>
+88
+89        <activity
+89-->[:url_launcher_android] D:\App-Development\wHRMS\build\url_launcher_android\intermediates\merged_manifest\debug\AndroidManifest.xml:10:9-13:74
+90            android:name="io.flutter.plugins.urllauncher.WebViewActivity"
+90-->[:url_launcher_android] D:\App-Development\wHRMS\build\url_launcher_android\intermediates\merged_manifest\debug\AndroidManifest.xml:11:13-74
+91            android:exported="false"
+91-->[:url_launcher_android] D:\App-Development\wHRMS\build\url_launcher_android\intermediates\merged_manifest\debug\AndroidManifest.xml:12:13-37
+92            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
+92-->[:url_launcher_android] D:\App-Development\wHRMS\build\url_launcher_android\intermediates\merged_manifest\debug\AndroidManifest.xml:13:13-71
+93
+94        <uses-library
+94-->[androidx.window:window:1.0.0-beta04] C:\Users\vijay\.gradle\caches\transforms-3\29fe38a5fd6c3bf46cd8e59c2b63489e\transformed\jetified-window-1.0.0-beta04\AndroidManifest.xml:25:9-27:40
+95            android:name="androidx.window.extensions"
+95-->[androidx.window:window:1.0.0-beta04] C:\Users\vijay\.gradle\caches\transforms-3\29fe38a5fd6c3bf46cd8e59c2b63489e\transformed\jetified-window-1.0.0-beta04\AndroidManifest.xml:26:13-54
+96            android:required="false" />
+96-->[androidx.window:window:1.0.0-beta04] C:\Users\vijay\.gradle\caches\transforms-3\29fe38a5fd6c3bf46cd8e59c2b63489e\transformed\jetified-window-1.0.0-beta04\AndroidManifest.xml:27:13-37
+97        <uses-library
+97-->[androidx.window:window:1.0.0-beta04] C:\Users\vijay\.gradle\caches\transforms-3\29fe38a5fd6c3bf46cd8e59c2b63489e\transformed\jetified-window-1.0.0-beta04\AndroidManifest.xml:28:9-30:40
+98            android:name="androidx.window.sidecar"
+98-->[androidx.window:window:1.0.0-beta04] C:\Users\vijay\.gradle\caches\transforms-3\29fe38a5fd6c3bf46cd8e59c2b63489e\transformed\jetified-window-1.0.0-beta04\AndroidManifest.xml:29:13-51
+99            android:required="false" />
+99-->[androidx.window:window:1.0.0-beta04] C:\Users\vijay\.gradle\caches\transforms-3\29fe38a5fd6c3bf46cd8e59c2b63489e\transformed\jetified-window-1.0.0-beta04\AndroidManifest.xml:30:13-37
+100
+101        <provider
+101-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\vijay\.gradle\caches\transforms-3\d8b20124984237c0e54cf00d7c7f47a6\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:24:9-32:20
+102            android:name="androidx.startup.InitializationProvider"
+102-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\vijay\.gradle\caches\transforms-3\d8b20124984237c0e54cf00d7c7f47a6\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:25:13-67
+103            android:authorities="com.wesscosoft.wHRMS.androidx-startup"
+103-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\vijay\.gradle\caches\transforms-3\d8b20124984237c0e54cf00d7c7f47a6\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:26:13-68
+104            android:exported="false" >
+104-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\vijay\.gradle\caches\transforms-3\d8b20124984237c0e54cf00d7c7f47a6\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:27:13-37
+105            <meta-data
+105-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\vijay\.gradle\caches\transforms-3\d8b20124984237c0e54cf00d7c7f47a6\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:29:13-31:52
+106                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+106-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\vijay\.gradle\caches\transforms-3\d8b20124984237c0e54cf00d7c7f47a6\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:30:17-85
+107                android:value="androidx.startup" />
+107-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\vijay\.gradle\caches\transforms-3\d8b20124984237c0e54cf00d7c7f47a6\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:31:17-49
+108        </provider>
+109
+110        <receiver
+110-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\vijay\.gradle\caches\transforms-3\d8b20124984237c0e54cf00d7c7f47a6\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:34:9-52:20
+111            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+111-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\vijay\.gradle\caches\transforms-3\d8b20124984237c0e54cf00d7c7f47a6\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:35:13-76
+112            android:directBootAware="false"
+112-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\vijay\.gradle\caches\transforms-3\d8b20124984237c0e54cf00d7c7f47a6\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:36:13-44
+113            android:enabled="true"
+113-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\vijay\.gradle\caches\transforms-3\d8b20124984237c0e54cf00d7c7f47a6\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:37:13-35
+114            android:exported="true"
+114-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\vijay\.gradle\caches\transforms-3\d8b20124984237c0e54cf00d7c7f47a6\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:38:13-36
+115            android:permission="android.permission.DUMP" >
+115-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\vijay\.gradle\caches\transforms-3\d8b20124984237c0e54cf00d7c7f47a6\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:39:13-57
+116            <intent-filter>
+116-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\vijay\.gradle\caches\transforms-3\d8b20124984237c0e54cf00d7c7f47a6\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:40:13-42:29
+117                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+117-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\vijay\.gradle\caches\transforms-3\d8b20124984237c0e54cf00d7c7f47a6\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:41:17-91
+117-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\vijay\.gradle\caches\transforms-3\d8b20124984237c0e54cf00d7c7f47a6\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:41:25-88
+118            </intent-filter>
+119            <intent-filter>
+119-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\vijay\.gradle\caches\transforms-3\d8b20124984237c0e54cf00d7c7f47a6\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:43:13-45:29
+120                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+120-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\vijay\.gradle\caches\transforms-3\d8b20124984237c0e54cf00d7c7f47a6\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:44:17-85
+120-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\vijay\.gradle\caches\transforms-3\d8b20124984237c0e54cf00d7c7f47a6\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:44:25-82
+121            </intent-filter>
+122            <intent-filter>
+122-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\vijay\.gradle\caches\transforms-3\d8b20124984237c0e54cf00d7c7f47a6\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:46:13-48:29
+123                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+123-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\vijay\.gradle\caches\transforms-3\d8b20124984237c0e54cf00d7c7f47a6\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:47:17-88
+123-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\vijay\.gradle\caches\transforms-3\d8b20124984237c0e54cf00d7c7f47a6\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:47:25-85
+124            </intent-filter>
+125            <intent-filter>
+125-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\vijay\.gradle\caches\transforms-3\d8b20124984237c0e54cf00d7c7f47a6\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:49:13-51:29
+126                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+126-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\vijay\.gradle\caches\transforms-3\d8b20124984237c0e54cf00d7c7f47a6\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:50:17-95
+126-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\vijay\.gradle\caches\transforms-3\d8b20124984237c0e54cf00d7c7f47a6\transformed\jetified-profileinstaller-1.3.0\AndroidManifest.xml:50:25-92
+127            </intent-filter>
+128        </receiver>
+129    </application>
+130
+131</manifest>

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:logger/logger.dart';
 import 'package:wHRMS/View/home_screen.dart';
-
 import 'package:wHRMS/login/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

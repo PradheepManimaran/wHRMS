@@ -1,16 +1,14 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
-import 'package:logger/logger.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:table_calendar/table_calendar.dart';
-
+import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:wHRMS/ThemeColor/theme.dart';
-import 'package:wHRMS/View/home_screen.dart';
 import 'package:wHRMS/apiHandlar/baseUrl.dart';
+import 'package:wHRMS/pages/textwidget.dart';
 
 class AttendanceScreen extends StatefulWidget {
   const AttendanceScreen({Key? key}) : super(key: key);
@@ -22,11 +20,19 @@ class AttendanceScreen extends StatefulWidget {
 class _AttendanceScreenState extends State<AttendanceScreen> {
   TextEditingController dateController = TextEditingController();
   TextEditingController checkinController = TextEditingController();
-  TextEditingController statusController = TextEditingController();
+  // TextEditingController statusController = TextEditingController();
+  TextEditingController reasonController = TextEditingController();
+  // TextEditingController typeController = TextEditingController();
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  final Logger _logger = Logger();
+  // final Logger _logger = Logger();
+
+  String? selectedAttedanceType;
+  final List<String> attendanceOptions = ['Work From Office', 'Work From Home'];
+
+  String? selectedStatus;
+  final List<String> statusOptions = ['present', 'absent'];
 
   static Future<String?> getAuthToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -39,10 +45,10 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     try {
       String? token = await getAuthToken();
 
-      if (token == null) {
-        print('Token not found in shared preferences');
-        return;
-      }
+      // if (token == null) {
+      //   print('Token not found in shared preferences');
+      //   return;
+      // }
 
       var headers = {
         'Authorization': 'token $token',
@@ -62,16 +68,17 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       );
 
       if (response.statusCode == 201) {
-        final employeeData = json.decode(response.body);
-        _logger.d('Attendance successfully: $employeeData');
+        // final employeeData = json.decode(response.body);
+        print('Attendance successfully: ${response.body}');
+        dateController.clear();
+        checkinController.clear();
 
-        // Handle success - navigate to home screen or show a success message
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const HomeScreen(),
-          ),
-        );
+        reasonController.clear();
+        selectedAttedanceType = '';
+        setState(() {
+          selectedAttedanceType = '';
+          selectedStatus = '';
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             backgroundColor: Colors.green,
@@ -79,6 +86,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           ),
         );
       } else if (response.statusCode == 400) {
+        print('Response body: ${response.body}');
         // Handle bad request error
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -88,6 +96,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         );
       } else if (response.statusCode >= 500) {
         // Handle server error
+        print('Response body: ${response.body}');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             backgroundColor: Colors.red,
@@ -96,8 +105,12 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         );
       } else {
         // Handle other errors
-        print('Error: Unexpected status code ${response.statusCode}');
-        print('Response body: ${response.body}');
+        // if (kDebugMode) {
+        //   print('Error: Unexpected status code ${response.statusCode}');
+        // }
+        // if (kDebugMode) {
+        //   print('Response body: ${response.body}');
+        // }
       }
     } catch (e) {
       // Handle general errors
@@ -106,16 +119,21 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   }
 
   Map<String, String> _buildRequestBody() {
+    String currentDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
     return {
-      'date': dateController.text,
+      'date': currentDate,
       'check_in': checkinController.text,
-      'status': statusController.text,
+      'status': selectedStatus ?? '',
+      'reason': reasonController.text,
+      'attendance_type': selectedAttedanceType ?? '',
     };
   }
 
   void _handleError(dynamic e) {
-    _logger.e('Error: $e');
-    print('Error: $e');
+    // _logger.e('Error: $e');
+    // if (kDebugMode) {
+    //   print('Error: $e');
+    // }
     if (e is SocketException) {
       _showSnackBar(context, 'No Internet Connection');
     }
@@ -148,7 +166,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 20),
+                const SizedBox(height: 5),
                 const Align(
                   alignment: Alignment.topLeft,
                   child: Text(
@@ -160,34 +178,73 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                     textAlign: TextAlign.start,
                   ),
                 ),
-                const SizedBox(height: 100),
-                _buildTextFields(
+                const SizedBox(height: 10),
+                TextWidget.buildDateField(
                   hintText: 'Date',
-                  controller: dateController,
+                  // controller: dateController,
                   prefixIconData: Icons.date_range_outlined,
                   fieldName: 'Date',
-                  isDateField: true, // Set this to true for the date field
+                  isDateField: true,
+                  context: context,
                 ),
-                const SizedBox(height: 20),
-                _buildTextFieldss(
+                const SizedBox(height: 10),
+                TextWidget.buildDateTimeField(
                   hintText: 'Check In',
                   controller: checkinController,
                   prefixIconData: Icons.timelapse,
                   fieldName: 'Check In',
                   isDateField: true,
+                  context: context,
                 ),
-                const SizedBox(height: 20),
-                _buildTextField(
+                const SizedBox(height: 10),
+                TextWidget.buildTextField(
+                  hintText: 'Reason',
+                  controller: reasonController,
+                  prefixIconData: Icons.receipt_sharp,
+                  fieldName: 'Reason',
+                ),
+                const SizedBox(height: 10),
+                TextWidget.buildDropdownFormField(
+                  items: attendanceOptions,
+                  selectedValue: selectedAttedanceType,
+                  hintText: 'Attendance Type',
+                  onChanged: (String? value) {
+                    setState(() {
+                      selectedAttedanceType = value;
+                    });
+                  },
+                  fieldName: 'Attendance Type',
+                  prefixIconData: Icons.access_alarm_sharp,
+                ),
+                const SizedBox(height: 10),
+                TextWidget.buildDropdownFormField(
+                  items: statusOptions,
+                  selectedValue: selectedStatus,
                   hintText: 'Status',
-                  controller: statusController,
-                  prefixIconData: Icons.star_outline_sharp,
+                  onChanged: (String? value) {
+                    setState(() {
+                      selectedStatus = value;
+                    });
+                  },
                   fieldName: 'Status',
+                  prefixIconData: Icons.star_border_outlined,
                 ),
-                const SizedBox(height: 15),
+                const SizedBox(height: 10),
+                const Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    'Check In Time : 09:30 AM',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 5),
                 Align(
                   alignment: Alignment.center,
                   child: SizedBox(
-                    width: 340.0,
+                    width: double.infinity,
                     height: 60.0,
                     child: ElevatedButton(
                       onPressed: () {
@@ -213,158 +270,12 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                CalendarWidget(), // This will display the calendar below the Apply button
+                CalendarWidget(),
               ],
             ),
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String hintText,
-    required IconData prefixIconData,
-    required String fieldName,
-  }) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        hintText: hintText,
-        enabledBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.grey),
-        ),
-        focusedBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.grey),
-        ),
-        prefixIcon: Icon(prefixIconData),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(6),
-          borderSide: const BorderSide(
-            color: Colors.grey,
-            width: 2.0,
-          ),
-        ),
-        filled: true,
-        fillColor: Colors.white,
-      ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please enter $fieldName';
-        }
-        return null;
-      },
-    );
-  }
-
-  Widget _buildTextFieldss({
-    required TextEditingController controller,
-    required String hintText,
-    required IconData prefixIconData,
-    required String fieldName,
-    bool isDateField = false,
-  }) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        hintText: hintText,
-        enabledBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.grey),
-        ),
-        focusedBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.grey),
-        ),
-        prefixIcon: Icon(prefixIconData),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(6),
-          borderSide: const BorderSide(
-            color: Colors.grey,
-            width: 2.0,
-          ),
-        ),
-        filled: true,
-        fillColor: Colors.white,
-      ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please enter $fieldName';
-        }
-        return null;
-      },
-      onTap: () async {
-        if (isDateField) {
-          final DateTime? pickedDate = await showDatePicker(
-            context: context,
-            initialDate: DateTime.now(),
-            firstDate: DateTime(2000),
-            lastDate: DateTime(2101),
-          );
-          if (pickedDate != null) {
-            DateTime dateTime = DateTime(
-              pickedDate.year,
-              pickedDate.month,
-              pickedDate.day,
-              DateTime.now().hour,
-              DateTime.now().minute,
-            );
-            String formattedDateTime =
-                DateFormat('yyyy-MM-dd HH:mm').format(dateTime);
-            controller.text = formattedDateTime;
-          }
-        }
-      },
-    );
-  }
-
-  Widget _buildTextFields({
-    required TextEditingController controller,
-    required String hintText,
-    required IconData prefixIconData,
-    required String fieldName,
-    bool isDateField = false,
-  }) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        hintText: hintText,
-        enabledBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.grey),
-        ),
-        focusedBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.grey),
-        ),
-        prefixIcon: Icon(prefixIconData),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(6),
-          borderSide: const BorderSide(
-            color: Colors.grey,
-            width: 2.0,
-          ),
-        ),
-        filled: true,
-        fillColor: Colors.white,
-      ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please enter $fieldName';
-        }
-        return null;
-      },
-      onTap: () async {
-        if (isDateField) {
-          final DateTime? pickedDate = await showDatePicker(
-            context: context,
-            initialDate: DateTime.now(),
-            firstDate: DateTime(2000),
-            lastDate: DateTime(2101),
-          );
-          if (pickedDate != null && pickedDate != DateTime.now()) {
-            String formattedDate = DateFormat('yyyy-MM-dd').format(pickedDate);
-            controller.text = formattedDate;
-          }
-        }
-      },
     );
   }
 }
@@ -375,28 +286,25 @@ class CalendarWidget extends StatefulWidget {
 }
 
 class _CalendarWidgetState extends State<CalendarWidget> {
-  late CalendarFormat _calendarFormat;
-  late DateTime _focusedDay;
-  late DateTime _selectedDay;
-  List<Map<String, dynamic>> _attendanceData = [];
+  late List<Appointment> _appointments = [];
+  // final Logger _logger = Logger();
+  Timer? _timer;
+  // late DateTime _selectedDate;
 
   @override
   void initState() {
     super.initState();
-    _calendarFormat = CalendarFormat.month;
-    _focusedDay = DateTime.now();
-    _selectedDay = DateTime.now();
-    _initializeAttendanceData();
-    _fetchAttendance();
+    // _selectedDate = DateTime.now();
+    // _fetchAppointments();
+    _timer ??= Timer.periodic(const Duration(seconds: 1), (timer) {
+      _fetchAppointments();
+    });
   }
 
-  // Initialize default attendance data for the specified dates
-  void _initializeAttendanceData() {
-    _attendanceData = [
-      {'date': DateTime(2024, 2, 10), 'status': 'present'},
-      {'date': DateTime(2024, 2, 15), 'status': 'present'},
-      {'date': DateTime(2024, 2, 18), 'status': 'present'},
-    ];
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   static Future<String?> getAuthToken() async {
@@ -404,113 +312,158 @@ class _CalendarWidgetState extends State<CalendarWidget> {
     return prefs.getString('token');
   }
 
-  Future<void> _fetchAttendance() async {
-    // Simulated API URL
-    const String apiUrlAttendance = '${URLConstants.baseUrl}/api/attendance';
+  Future<void> _fetchAppointments() async {
+    const apiUrl = '${URLConstants.baseUrl}/api/attendance';
 
     try {
       String? token = await getAuthToken();
-
-      if (token == null) {
-        print('Token not found in shared preferences');
-        return;
-      }
-
       var headers = {
         'Authorization': 'token $token',
         'Content-Type': 'application/json',
       };
-
       final response = await http.get(
-        Uri.parse(apiUrlAttendance),
+        Uri.parse(apiUrl),
         headers: headers,
       );
 
+      // print('Response status code: ${response.statusCode}');
+      // print('Response body: ${response.body}');
       if (response.statusCode == 200) {
-        setState(() {
-          _attendanceData = (json.decode(response.body) as List<dynamic>)
-              .cast<Map<String, dynamic>>();
-        });
-        print('Attendance data: $_attendanceData');
-        print('Response body: ${response.body}');
-      } else {
-        // Handle errors
-        print('Error: ${response.statusCode}');
-        print('Response body: ${response.body}');
+        final dynamic responseData = json.decode(response.body);
+        if (responseData != null && responseData is List<dynamic>) {
+          setState(() {
+            _appointments = _parseAppointments(responseData);
+          });
+        } else {
+          // if (kDebugMode) {
+          //   print('Response data is not in the expected format');
+          // }
+        }
+      } else if (response.statusCode == 400) {
+        // if (kDebugMode) {
+        //   print('Failed to fetch Attendance');
+        // }
+        // if (kDebugMode) {
+        //   print('Error Status Code: ${response.statusCode}');
+        // }
+        // if (kDebugMode) {
+        //   print('Failed to fetch Attendance: ${response.body}');
+        // }
+      } else if (response.statusCode == 500) {
+        // if (kDebugMode) {
+        //   print('Failed to fetch Attendance');
+        // }
+        // if (kDebugMode) {
+        //   print('Error Status Code: ${response.statusCode}');
+        // }
+        // if (kDebugMode) {
+        //   print('Failed to fetch Attendance: ${response.body}');
+        // }
       }
     } catch (e) {
-      // Handle general errors
-      print('Error fetching attendance data: $e');
+      // if (kDebugMode) {
+      //   print('Error fetching Attendance: $e');
+      // }
+      // Handle error
+    }
+  }
+
+  List<Appointment> _parseAppointments(List<dynamic> responseData) {
+    // Map the response data to Appointment objects
+    return responseData.map((data) {
+      DateTime startTime = data['check_in'] != null
+          ? DateTime.parse(data['check_in'])
+          : DateTime.now();
+      Color color = _getColorForStatus(data['status']);
+      return Appointment(
+        startTime: startTime,
+        endTime: startTime.add(const Duration(hours: 1)),
+        subject: data['status'] ?? 'No status',
+        color: color, // Set color based on status
+      );
+    }).toList();
+  }
+
+  Color _getColorForStatus(String? status) {
+    switch (status) {
+      case 'present':
+        return Colors.green;
+      case 'absent':
+        return Colors.red;
+      default:
+        return Colors.blue;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return TableCalendar(
-      firstDay: DateTime.utc(2020, 1, 1),
-      lastDay: DateTime.utc(2030, 12, 31),
-      focusedDay: _focusedDay,
-      calendarFormat: _calendarFormat,
-      selectedDayPredicate: (day) {
-        return isSameDay(_selectedDay, day);
+    return SfCalendar(
+      view: CalendarView.month,
+      dataSource: _getCalendarDataSource(),
+      onTap: (CalendarTapDetails details) {
+        if (details.targetElement == CalendarElement.calendarCell) {
+          setState(() {
+            //
+          });
+        }
       },
-      eventLoader: _getEventsForDay,
-      onDaySelected: (selectedDay, focusedDay) {
-        setState(() {
-          _selectedDay = selectedDay;
-          _focusedDay = focusedDay;
-        });
+      monthCellBuilder: (BuildContext context, MonthCellDetails details) {
+        bool hasAppointments = _hasAppointments(details.date);
+
+        // Get color for the date
+        Color cellColor = hasAppointments
+            ? _getAppointmentColorForDate(details.date)
+            : Colors.white;
+
+        // Check if the day is Sunday
+        if (details.date.weekday == DateTime.sunday) {
+          cellColor = Colors.blue;
+        }
+
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            color: cellColor,
+            border: Border.all(color: Colors.grey.withOpacity(0.3)),
+          ),
+          child: Center(
+            child: Text(
+              '${details.date.day}',
+              style: const TextStyle(color: Colors.black),
+            ),
+          ),
+        );
       },
-      calendarStyle: CalendarStyle(
-        markersMaxCount: 1,
-        markerDecoration: BoxDecoration(
-          shape: BoxShape.circle,
-        ),
-        outsideDaysVisible: false, // Hide days outside the current month
-      ),
-      daysOfWeekStyle: DaysOfWeekStyle(
-        weekendStyle: TextStyle(color: Colors.red), // Weekends in red
-      ),
+      backgroundColor: Colors.grey.withOpacity(0.5),
+      cellBorderColor: Colors.yellow,
     );
   }
 
-  List<Widget> _getEventsForDay(DateTime day) {
-    List<Widget> events = [];
+  bool _hasAppointments(DateTime date) {
+    return _appointments.any((appointment) =>
+        appointment.startTime.year == date.year &&
+        appointment.startTime.month == date.month &&
+        appointment.startTime.day == date.day);
+  }
 
-    // Filter attendance data for the selected day
-    final attendanceForDay = _attendanceData.firstWhere(
-      (element) {
-        // Ensure the date field is not null
-        dynamic date = element['date'];
-        if (date is String) {
-          // Parse the date from String to DateTime
-          DateTime parsedDate = DateTime.parse(date);
-          return isSameDay(parsedDate, day);
-        } else if (date is DateTime) {
-          // Compare the date directly
-          return isSameDay(date, day);
-        } else {
-          // Handle invalid date format
-          return false;
-        }
-      },
-      orElse: () => {},
-    );
+  Color _getAppointmentColorForDate(DateTime date) {
+    // Find appointments for the date
+    var appointmentsForDate = _appointments.where((appointment) =>
+        appointment.startTime.year == date.year &&
+        appointment.startTime.month == date.month &&
+        appointment.startTime.day == date.day);
 
-    // If there is attendance data for the selected day, display its status
-    if (attendanceForDay != null) {
-      String status = attendanceForDay['status'].toString().toLowerCase();
-      Color markerColor = status == 'present' ? Colors.green : Colors.red;
-      events.add(Container(
-        width: 10,
-        height: 10,
-        decoration: BoxDecoration(
-          color: markerColor,
-          shape: BoxShape.circle,
-        ),
-      ));
-    }
+    return appointmentsForDate.isNotEmpty
+        ? appointmentsForDate.first.color
+        : Colors.black;
+  }
 
-    return events;
+  _DataSource _getCalendarDataSource() {
+    return _DataSource(_appointments);
+  }
+}
+
+class _DataSource extends CalendarDataSource {
+  _DataSource(List<Appointment> source) {
+    appointments = source;
   }
 }

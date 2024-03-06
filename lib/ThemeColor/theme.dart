@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ThemeColor {
-  static const app_bar = Color(0xFF5F5DA0); //Appbar Color
+  static const app_bar = Color(0xFF095F88); //Appbar Color
   static const log_background = Color(0xFFEAEAF4); //Body background Color
   static const btn_color = Color(0xFF296CA2); //Button Color
   // static const board_color = Color.fromARGB(0, 235, 212, 212);

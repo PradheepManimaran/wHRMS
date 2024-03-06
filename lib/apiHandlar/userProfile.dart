@@ -17,7 +17,9 @@ class ApiHelper {
       String? token = prefs.getString('token');
 
       if (token == null) {
-        print('Token not found in shared preferences');
+        // if (kDebugMode) {
+        //   print('Token not found in shared preferences');
+        // }
         return;
       }
 
@@ -34,11 +36,20 @@ class ApiHelper {
       );
 
       if (response.statusCode == 201) {
-        print('Data posted successfully');
-        print('status code : ${response.statusCode}');
-        print('Response body: ${response.body}');
-        print('Token: $token');
+        // if (kDebugMode) {
+        //   print('Data posted successfully');
+        // }
+        // if (kDebugMode) {
+        //   print('status code : ${response.statusCode}');
+        // }
+        // if (kDebugMode) {
+        //   print('Response body: ${response.body}');
+        // }
+        // if (kDebugMode) {
+        //   print('Token: $token');
+        // }
 
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             backgroundColor: Colors.green,
@@ -48,6 +59,7 @@ class ApiHelper {
         );
         // ignore: use_build_context_synchronously
         Navigator.pushReplacement(
+          // ignore: use_build_context_synchronously
           context,
           MaterialPageRoute(
             builder: (context) => const HomeScreen(),
@@ -55,15 +67,17 @@ class ApiHelper {
         );
       } else if (response.statusCode == 400) {
         // Bad request - Invalid email format
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             backgroundColor: Colors.red,
             content: Text('Bad Request: Error creating Employee.'),
           ),
         );
-        print('Test Response Employee: ${response.body}');
+        // print('Test Response Employee: ${response.body}');
       } else if (response.statusCode == 401) {
         // Unauthorized - User not found
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             backgroundColor: Colors.red,
@@ -72,16 +86,22 @@ class ApiHelper {
         );
       } else if (response.statusCode == 500) {
         // Internal server error
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             backgroundColor: Colors.blue,
             content: Text('Internal server error. Please try again later.'),
           ),
         );
-        print('Employee Status code: ${response.statusCode}');
-        print('Employee body: ${response.body}');
+        // if (kDebugMode) {
+        //   print('Employee Status code: ${response.statusCode}');
+        // }
+        // if (kDebugMode) {
+        //   print('Employee body: ${response.body}');
+        // }
       } else {
         // Other errors
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Failed to Work Upload.'),
@@ -89,7 +109,10 @@ class ApiHelper {
         );
       }
     } catch (e) {
-      print('Error sending Work Experience: $e');
+      // if (kDebugMode) {
+      //   print('Error sending Work Experience: $e');
+      // }
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Error sending Work Experience.'),
@@ -111,7 +134,9 @@ class WorkApi {
       String? token = prefs.getString('token');
 
       if (token == null) {
-        print('Token not found in shared preferences');
+        // if (kDebugMode) {
+        //   print('Token not found in shared preferences');
+        // }
         return;
       }
 
@@ -131,13 +156,22 @@ class WorkApi {
       );
 
       if (response.statusCode == 201) {
-        print('Data posted successfully');
-        print('Status code: ${response.statusCode}');
-        print('Response body: ${response.body}');
-        print('Token: $token');
+        // if (kDebugMode) {
+        //   print('Data posted successfully');
+        // }
+        // if (kDebugMode) {
+        //   print('Status code: ${response.statusCode}');
+        // }
+        // if (kDebugMode) {
+        //   print('Response body: ${response.body}');
+        // }
+        // if (kDebugMode) {
+        //   print('Token: $token');
+        // }
         // Handle successful response
       } else if (response.statusCode == 400) {
         // Bad request - Invalid email format
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             backgroundColor: Colors.red,
@@ -146,6 +180,7 @@ class WorkApi {
         );
       } else if (response.statusCode == 401) {
         // Unauthorized - User not found
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             backgroundColor: Colors.red,
@@ -154,6 +189,7 @@ class WorkApi {
         );
       } else if (response.statusCode == 500) {
         // Internal server error
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             backgroundColor: Colors.blue,
@@ -162,6 +198,7 @@ class WorkApi {
         );
       } else {
         // Other errors
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Failed to Work Upload.'),
@@ -169,7 +206,10 @@ class WorkApi {
         );
       }
     } catch (e) {
-      print('Error sending Work Experience: $e');
+      // if (kDebugMode) {
+      //   print('Error sending Work Experience: $e');
+      // }
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Error sending Work Experience.'),
@@ -190,7 +230,9 @@ class EducationApi {
       String? token = prefs.getString('token');
 
       if (token == null) {
-        print('Token not found in shared preferences');
+        // if (kDebugMode) {
+        //   print('Token not found in shared preferences');
+        // }
         return;
       }
 
@@ -209,17 +251,34 @@ class EducationApi {
       );
 
       if (response.statusCode == 201) {
-        print('Data posted successfully');
-        print('status code : ${response.statusCode}');
-        print('Response body: ${response.body}');
-        print('Education user Table: $educationId');
-        print('Token: $token');
+        // if (kDebugMode) {
+        //   print('Data posted successfully');
+        // }
+        // if (kDebugMode) {
+        //   print('status code : ${response.statusCode}');
+        // }
+        // if (kDebugMode) {
+        //   print('Response body: ${response.body}');
+        // }
+        // if (kDebugMode) {
+        //   print('Education user Table: $educationId');
+        // }
+        // if (kDebugMode) {
+        //   print('Token: $token');
+        // }
         // Handle successful response
       } else if (response.statusCode == 400) {
         // Bad request - Invalid email format
-        print('Education Response StatusCode: ${response.statusCode}');
-        print('Education Response Body: ${response.body}');
-        print('Education user Table: $educationId');
+        // if (kDebugMode) {
+        //   print('Education Response StatusCode: ${response.statusCode}');
+        // }
+        // if (kDebugMode) {
+        //   print('Education Response Body: ${response.body}');
+        // }
+        // if (kDebugMode) {
+        //   print('Education user Table: $educationId');
+        // }
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             backgroundColor: Colors.red,
@@ -228,19 +287,31 @@ class EducationApi {
         );
       } else if (response.statusCode == 401) {
         // Unauthorized - User not found
-        print('Education Response StatusCode: ${response.statusCode}');
+        // if (kDebugMode) {
+        //   print('Education Response StatusCode: ${response.statusCode}');
+        // }
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             backgroundColor: Colors.red,
             content: Text('Authorized Error: Please login again.'),
           ),
         );
-        print('Education user Table: $educationId');
+        // if (kDebugMode) {
+        //   print('Education user Table: $educationId');
+        // }
       } else if (response.statusCode == 500) {
         // Internal server error
-        print('Education Response StatusCode: ${response.statusCode}');
-        print('Education Response Body: ${response.body}');
-        print('Education user Table: $educationId');
+        // if (kDebugMode) {
+        //   print('Education Response StatusCode: ${response.statusCode}');
+        // }
+        // if (kDebugMode) {
+        //   print('Education Response Body: ${response.body}');
+        // }
+        // if (kDebugMode) {
+        //   print('Education user Table: $educationId');
+        // }
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             backgroundColor: Colors.blue,
@@ -249,6 +320,7 @@ class EducationApi {
         );
       } else {
         // Other errors
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Failed to Educatuon Upload.'),
@@ -256,7 +328,10 @@ class EducationApi {
         );
       }
     } catch (e) {
-      print('Error sending Work Experience: $e');
+      // if (kDebugMode) {
+      //   print('Error sending Work Experience: $e');
+      // }
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Error occured Education.'),
@@ -283,18 +358,24 @@ class ImageUpload {
       String? token = await getAuthToken();
 
       if (token == null) {
-        print('Token not found in shared preferences');
+        // if (kDebugMode) {
+        //   print('Token not found in shared preferences');
+        // }
         return;
       }
 
       if (!await profilePictureImage.exists()) {
-        print('Error: Profile Picture selected files do not exist.');
+        // if (kDebugMode) {
+        //   print('Error: Profile Picture selected files do not exist.');
+        // }
         return;
       }
 
       // POST API method for image upload
       String dynamicUrl = '${URLConstants.baseUrl}/api/profileimg';
-      print('Dynamic URL: $dynamicUrl');
+      // if (kDebugMode) {
+      //   print('Dynamic URL: $dynamicUrl');
+      // }
 
       var headers = {
         'Authorization': 'token $token',
@@ -312,18 +393,30 @@ class ImageUpload {
 
       var response = await request.send();
 
-      print('Status code: ${response.statusCode}');
-      print('Token: $token');
+      // if (kDebugMode) {
+      //   print('Status code: ${response.statusCode}');
+      // }
+      // if (kDebugMode) {
+      //   print('Token: $token');
+      // }
       // print('Id: $userEmployeeID');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        print('Data Profile Picture successfully');
+        // if (kDebugMode) {
+        //   print('Data Profile Picture successfully');
+        // }
       } else {
-        print('statusCode: ${response.statusCode}');
-        print('Error Profile Picture Upload data.');
+        // if (kDebugMode) {
+        //   print('statusCode: ${response.statusCode}');
+        // }
+        // if (kDebugMode) {
+        //   print('Error Profile Picture Upload data.');
+        // }
       }
     } catch (e) {
-      print('Error Profile Picture Upload data: $e');
+      //   if (kDebugMode) {
+      //     print('Error Profile Picture Upload data: $e');
+      //   }
     }
   }
 }
@@ -344,18 +437,24 @@ class AadharImage {
       String? token = await getAuthToken();
 
       if (token == null) {
-        print('Token not found in shared preferences');
+        // if (kDebugMode) {
+        //   print('Token not found in shared preferences');
+        // }
         return;
       }
 
       if (!await adharCardImage.exists()) {
-        print('Error: Aadhar Image selected files do not exist.');
+        // if (kDebugMode) {
+        //   print('Error: Aadhar Image selected files do not exist.');
+        // }
         return;
       }
 
       // POST API method for image upload
       String dynamicUrl = '${URLConstants.baseUrl}/api/adharimg';
-      print('Dynamic URL: $dynamicUrl');
+      // if (kDebugMode) {
+      //   print('Dynamic URL: $dynamicUrl');
+      // }
 
       var headers = {
         'Authorization': 'token $token',
@@ -370,18 +469,30 @@ class AadharImage {
 
       var response = await request.send();
 
-      print('Status code: ${response.statusCode}');
-      print('Token: $token');
+      // if (kDebugMode) {
+      //   print('Status code: ${response.statusCode}');
+      // }
+      // if (kDebugMode) {
+      //   print('Token: $token');
+      // }
       // print('Id: $userEmployeeID');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        print('Aadhar Image Upload successfully');
+        // if (kDebugMode) {
+        //   print('Aadhar Image Upload successfully');
+        // }
       } else {
-        print('statusCode: ${response.statusCode}');
-        print('Error Aadhar Upload data.');
+        // if (kDebugMode) {
+        //   print('statusCode: ${response.statusCode}');
+        // }
+        // if (kDebugMode) {
+        //   print('Error Aadhar Upload data.');
+        // }
       }
     } catch (e) {
-      print('Error Aadhar Upload data: $e');
+      // if (kDebugMode) {
+      //   print('Error Aadhar Upload data: $e');
+      // }
     }
   }
 }

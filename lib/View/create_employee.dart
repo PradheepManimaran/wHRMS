@@ -1,14 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:logger/logger.dart';
 import 'package:http/http.dart' as http;
 import 'package:wHRMS/ThemeColor/theme.dart';
 import 'package:wHRMS/View/home_screen.dart';
 import 'package:wHRMS/apiHandlar/baseUrl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wHRMS/textfieldController/createTextField.dart';
 
 class CreateEmployee extends StatefulWidget {
   const CreateEmployee({Key? key}) : super(key: key);
@@ -34,7 +33,7 @@ class _CreateEmployeeState extends State<CreateEmployee> {
   String? selectedenrollStatus;
   String? selectedsourceHire;
 
-  final Logger _logger = Logger();
+  // final Logger _logger = Logger();
 
   // Other dropdown lists
   List<Map<String, dynamic>> roleList = [];
@@ -48,27 +47,39 @@ class _CreateEmployeeState extends State<CreateEmployee> {
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  // @override
-  // void dispose() {
-  //   _isDisposed = true;
-  //   super.dispose();
-  // }
-
   @override
   void initState() {
     super.initState();
     // Fetch dropdown data
-    _fetchDropdownData();
+    fetchAllData();
   }
 
-  Future<void> _fetchDropdownData() async {
-    // Fetch data for all dropdowns
-    await _fetchRoles();
-    await _fetchDepartments();
-    await _fetchDesignations();
-    await _fetchEnrollmentTypes();
-    await _fetchEnrollmentStatuses();
-    await _fetchSourceHires();
+  // Future<void> _fetchDropdownData() async {
+  //   // Fetch data for all dropdowns
+  //   await _fetchRoles();
+  //   await _fetchDepartments();
+  //   await _fetchDesignations();
+  //   await _fetchEnrollmentTypes();
+  //   await _fetchEnrollmentStatuses();
+  //   await _fetchSourceHires();
+  // }
+
+  Future<void> fetchAllData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString('token') ?? '';
+
+    try {
+      await Future.wait([
+        _fetchRoles(token),
+        _fetchDepartments(token),
+        _fetchDesignations(token),
+        _fetchEnrollmentTypes(token),
+        _fetchEnrollmentStatuses(token),
+        _fetchSourceHires(token),
+      ]);
+    } catch (e) {
+      _handleError(e);
+    }
   }
 
   Future<void> _createEmployee() async {
@@ -112,10 +123,10 @@ class _CreateEmployeeState extends State<CreateEmployee> {
           'source_hire': hire.toString(),
         },
       );
-      _logger.d('Testing StatusCode: ${response.statusCode}');
-      _logger.d('Testing StatusCode: ${response.body}');
-      _logger.d(
-          'Test Name: $name,Email: $email,Ph: $phoneNumber,DOJ: $DOJ,Password: $password,empID: $empID,Role: $role,Department: $department,Designation: $designation,EnrollType: $enTy,EnrollStatus: $enSt,Hire: $hire');
+      print('Testing StatusCode: ${response.statusCode}');
+      print('Testing StatusCode: ${response.body}');
+      // _logger.d(
+      //     'Test Name: $name,Email: $email,Ph: $phoneNumber,DOJ: $DOJ,Password: $password,empID: $empID,Role: $role,Department: $department,Designation: $designation,EnrollType: $enTy,EnrollStatus: $enSt,Hire: $hire');
 
       // Check if form is not valid, return
       if (!_formKey.currentState!.validate()) {
@@ -124,10 +135,10 @@ class _CreateEmployeeState extends State<CreateEmployee> {
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         final employeeData = json.decode(response.body);
-        _logger.d('Employee created successfully: $employeeData');
+        print('Employee created successfully: $employeeData');
 
         // Fetch dropdown data again after successful creation
-        _fetchDropdownData();
+        // _fetchDropdownData();
 
         // Navigate to HomeScreen
         Navigator.pushReplacement(
@@ -144,6 +155,7 @@ class _CreateEmployeeState extends State<CreateEmployee> {
         );
       } else if (response.statusCode == 400) {
         print('Response body: ${response.body}');
+        print('Response body: $empID');
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -151,10 +163,10 @@ class _CreateEmployeeState extends State<CreateEmployee> {
             content: Text('Bad Request: Error Creating Employee.'),
           ),
         );
-        print('Response Body: ${response.body}');
+        // print('Response Body: ${response.body}');
       } else if (response.statusCode == 401) {
-        _logger.d('Testing StatusCode: ${response.statusCode}');
-        _logger.d('Testing StatusCode: ${response.body}');
+        // _logger.d('Testing StatusCode: ${response.statusCode}');
+        // _logger.d('Testing StatusCode: ${response.body}');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             backgroundColor: Colors.red,
@@ -162,8 +174,9 @@ class _CreateEmployeeState extends State<CreateEmployee> {
           ),
         );
       } else if (response.statusCode == 500) {
-        _logger.d('Testing StatusCode: ${response.statusCode}');
-        _logger.d('Testing StatusCode: ${response.body}');
+        // print('Testing StatusCode: ${response.statusCode}');
+        // print('Testing StatusCode: ${response.body}');
+        print('Response body: $empID');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             backgroundColor: Colors.red,
@@ -183,7 +196,7 @@ class _CreateEmployeeState extends State<CreateEmployee> {
     }
   }
 
-  Future<void> _fetchRoles() async {
+  Future<void> _fetchRoles(String token) async {
     const String roleApiUrl = '${URLConstants.baseUrl}/api/role';
 
     try {
@@ -209,17 +222,23 @@ class _CreateEmployeeState extends State<CreateEmployee> {
                 'name': role['name'].toString(),
               }));
         });
-        print('Body: ${response.body}');
-      } else {
-        print('Error fetching roles. Status code: ${response.statusCode}');
-        print('Roles Response body: ${response.body}');
+        // print('Body: ${response.body}');
+      } else if (response.statusCode == 401) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.red,
+            content: Text('Invalid Token. Please Try again.'),
+          ),
+        );
+        // print('Error fetching roles. Status code: ${response.statusCode}');
+        // print('Roles Response body: ${response.body}');
       }
     } catch (e) {
       _handleError(e);
     }
   }
 
-  Future<void> _fetchDepartments() async {
+  Future<void> _fetchDepartments(String token) async {
     const String roleApiUrl = '${URLConstants.baseUrl}/api/department';
 
     try {
@@ -234,7 +253,7 @@ class _CreateEmployeeState extends State<CreateEmployee> {
       );
 
       if (response.statusCode == 200) {
-        _logger.d('Department fetched successfully');
+        // _logger.d('Department fetched successfully');
 
         final List<dynamic> department = json.decode(response.body);
 
@@ -246,15 +265,15 @@ class _CreateEmployeeState extends State<CreateEmployee> {
               }));
         });
       } else {
-        print('Error fetching Department. Status code: ${response.statusCode}');
-        print('Department Response body: ${response.body}');
+        // print('Error fetching Department. Status code: ${response.statusCode}');
+        // print('Department Response body: ${response.body}');
       }
     } catch (e) {
-      _handleError(e);
+      // _handleError(e);
     }
   }
 
-  Future<void> _fetchDesignations() async {
+  Future<void> _fetchDesignations(String token) async {
     const String roleApiUrl = '${URLConstants.baseUrl}/api/designation';
 
     try {
@@ -269,7 +288,7 @@ class _CreateEmployeeState extends State<CreateEmployee> {
       );
 
       if (response.statusCode == 200) {
-        _logger.d('Designation fetched successfully');
+        // _logger.d('Designation fetched successfully');
 
         final List<dynamic> desig = json.decode(response.body);
 
@@ -281,16 +300,16 @@ class _CreateEmployeeState extends State<CreateEmployee> {
               }));
         });
       } else {
-        print(
-            'Error fetching Designation. Status code: ${response.statusCode}');
-        print('Designation Response body: ${response.body}');
+        // print(
+        //     'Error fetching Designation. Status code: ${response.statusCode}');
+        // print('Designation Response body: ${response.body}');
       }
     } catch (e) {
-      _handleError(e);
+      // _handleError(e);
     }
   }
 
-  Future<void> _fetchEnrollmentTypes() async {
+  Future<void> _fetchEnrollmentTypes(String token) async {
     const String roleApiUrl = '${URLConstants.baseUrl}/api/enrollment_type';
 
     try {
@@ -305,7 +324,7 @@ class _CreateEmployeeState extends State<CreateEmployee> {
       );
 
       if (response.statusCode == 200) {
-        _logger.d('EnrollType fetched successfully');
+        // _logger.d('EnrollType fetched successfully');
 
         final List<dynamic> enType = json.decode(response.body);
 
@@ -317,15 +336,15 @@ class _CreateEmployeeState extends State<CreateEmployee> {
               }));
         });
       } else {
-        print('Error fetching EnrollType. Status code: ${response.statusCode}');
-        print('EnrollType Response body: ${response.body}');
+        // print('Error fetching EnrollType. Status code: ${response.statusCode}');
+        // print('EnrollType Response body: ${response.body}');
       }
     } catch (e) {
-      _handleError(e);
+      // _handleError(e);
     }
   }
 
-  Future<void> _fetchEnrollmentStatuses() async {
+  Future<void> _fetchEnrollmentStatuses(String token) async {
     const String roleApiUrl = '${URLConstants.baseUrl}/api/enrollment_status';
 
     try {
@@ -340,7 +359,7 @@ class _CreateEmployeeState extends State<CreateEmployee> {
       );
 
       if (response.statusCode == 200) {
-        _logger.d('EnrollStatus fetched successfully');
+        // _logger.d('EnrollStatus fetched successfully');
 
         final List<dynamic> enStatus = json.decode(response.body);
 
@@ -353,16 +372,16 @@ class _CreateEmployeeState extends State<CreateEmployee> {
               }));
         });
       } else {
-        print(
-            'Error fetching EnrollStatus. Status code: ${response.statusCode}');
-        print('EnrollStatus Response body: ${response.body}');
+        // print(
+        //     'Error fetching EnrollStatus. Status code: ${response.statusCode}');
+        // print('EnrollStatus Response body: ${response.body}');
       }
     } catch (e) {
-      _handleError(e);
+      // _handleError(e);
     }
   }
 
-  Future<void> _fetchSourceHires() async {
+  Future<void> _fetchSourceHires(String token) async {
     const String roleApiUrl = '${URLConstants.baseUrl}/api/source_hire';
 
     try {
@@ -377,7 +396,7 @@ class _CreateEmployeeState extends State<CreateEmployee> {
       );
 
       if (response.statusCode == 200) {
-        _logger.d('SourceHire fetched successfully');
+        // _logger.d('SourceHire fetched successfully');
 
         final List<dynamic> sourceHire = json.decode(response.body);
 
@@ -389,16 +408,16 @@ class _CreateEmployeeState extends State<CreateEmployee> {
               }));
         });
       } else {
-        print('Error fetching SourceHire. Status code: ${response.statusCode}');
-        print('SourceHire Response body: ${response.body}');
+        // print('Error fetching SourceHire. Status code: ${response.statusCode}');
+        // print('SourceHire Response body: ${response.body}');
       }
     } catch (e) {
-      _handleError(e);
+      // _handleError(e);
     }
   }
 
   void _handleError(dynamic e) {
-    _logger.e('Error: $e');
+    // _logger.e('Error: $e');
     print('Error: $e');
     if (e is SocketException) {
       _showSnackBar('No Internet Connection');
@@ -462,29 +481,29 @@ class _CreateEmployeeState extends State<CreateEmployee> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildTextFields(
+                    createText.buildTextFields(
                       controller: usernameController,
                       hintText: 'UserName',
                       prefixIconData: Icons.person,
-                      fieldName: 'UserName',
+                      // fieldName: 'UserName',
                     ),
-                    _buildTextFormFields(
+                    createText.buildEmployeeText(
                       controller: employeeIdController,
-                      hintText: 'Emp ID ',
+                      hintText: 'WEMP ',
                       prefixIconData: Icons.phone_android,
-                      fieldName: 'Emp ID',
+                      // fieldName: 'Emp ID',
                     ),
                   ],
                 ),
                 const SizedBox(height: 15),
-                _buildTextFieldss(
+                createText.buildEmailTextField(
                   controller: emailController,
                   hintText: 'Email Address',
                   prefixIconData: Icons.email,
                   fieldName: 'Email Address',
                 ),
                 const SizedBox(height: 15),
-                _buildTextField(
+                createText.buildTextField(
                   controller: phoneController,
                   hintText: 'PhoneNumber',
                   prefixIconData: Icons.phone,
@@ -494,7 +513,7 @@ class _CreateEmployeeState extends State<CreateEmployee> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildDropdowns(
+                    createText.buildDropdowns(
                       selectedValue: selectedRole,
                       hintText: 'Role',
                       items: roleList.map((Map<String, dynamic> role) {
@@ -511,7 +530,7 @@ class _CreateEmployeeState extends State<CreateEmployee> {
                       fieldName: 'Role',
                       prefixIconData: Icons.person,
                     ),
-                    _buildDropdowns(
+                    createText.buildDropdowns(
                       items: desList.map((Map<String, dynamic> dep) {
                         return DropdownMenuItem<String>(
                           value: dep['name'],
@@ -531,7 +550,7 @@ class _CreateEmployeeState extends State<CreateEmployee> {
                   ],
                 ),
                 const SizedBox(height: 15),
-                _buildDropdown(
+                createText.buildDropdown(
                   items: departmentList.map((Map<String, dynamic> dept) {
                     return DropdownMenuItem<String>(
                       value: dept['name'],
@@ -552,7 +571,7 @@ class _CreateEmployeeState extends State<CreateEmployee> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildDropdowns(
+                    createText.buildDropdowns(
                       items: enrollTypeList.map((Map<String, dynamic> enTY) {
                         return DropdownMenuItem<String>(
                           value: enTY['name'],
@@ -569,7 +588,7 @@ class _CreateEmployeeState extends State<CreateEmployee> {
                       fieldName: 'EnrollType',
                       prefixIconData: Icons.local_fire_department,
                     ),
-                    _buildDropdowns(
+                    createText.buildDropdowns(
                       items: enrollStatusList.map((Map<String, dynamic> enSt) {
                         return DropdownMenuItem<String>(
                           value: enSt['name'],
@@ -592,7 +611,7 @@ class _CreateEmployeeState extends State<CreateEmployee> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildDropdowns(
+                    createText.buildDropdowns(
                       items: sourceHireList.map((Map<String, dynamic> source) {
                         return DropdownMenuItem<String>(
                           value: source['name'],
@@ -616,7 +635,7 @@ class _CreateEmployeeState extends State<CreateEmployee> {
                   ],
                 ),
                 const SizedBox(height: 15),
-                _buildTextField(
+                createText.buildTextField(
                   controller: passwordController,
                   hintText: 'Password',
                   prefixIconData: Icons.password,
@@ -626,23 +645,23 @@ class _CreateEmployeeState extends State<CreateEmployee> {
                 Align(
                   alignment: Alignment.center,
                   child: SizedBox(
-                    width: 340.0,
+                    width: double.infinity,
                     height: 60.0,
                     child: ElevatedButton(
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
                           _createEmployee();
-                          _fetchRoles();
-                          _fetchDepartments();
-                          _fetchDesignations();
-                          _fetchEnrollmentTypes();
-                          _fetchEnrollmentStatuses();
-                          _fetchSourceHires();
+                          // _fetchRoles(token);
+                          // _fetchDepartments();
+                          // _fetchDesignations();
+                          // _fetchEnrollmentTypes();
+                          // _fetchEnrollmentStatuses();
+                          // _fetchSourceHires();
                         }
                       },
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(1.0),
+                          borderRadius: BorderRadius.circular(6.0),
                         ),
                         backgroundColor:
                             ThemeColor.app_bar, // Replace with your app's color
@@ -664,230 +683,7 @@ class _CreateEmployeeState extends State<CreateEmployee> {
           ),
         ),
       ),
-      backgroundColor: ThemeColor.log_background,
-    );
-  }
-
-  _buildTextFormFields({
-    required TextEditingController controller,
-    required String hintText,
-    required IconData prefixIconData,
-    required String fieldName,
-  }) {
-    return SizedBox(
-      width: 150,
-      child: TextFormField(
-        controller: controller,
-        decoration: InputDecoration(
-          enabledBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.grey),
-          ),
-          focusedBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.blue),
-          ),
-          hintText: hintText,
-          filled: true,
-          fillColor: Colors.white,
-          prefixIcon: Icon(prefixIconData),
-          border: OutlineInputBorder(),
-        ),
-        onChanged: (value) {
-          // Check if the current value starts with 'WEMP'
-          if (!value.startsWith('WEMP')) {
-            // If not, prepend 'WEMP' to the entered value
-            controller.value = controller.value.copyWith(
-              text: 'WEMP$value',
-              selection: TextSelection.collapsed(offset: ('WEMP$value').length),
-              composing: TextRange.empty,
-            );
-          }
-        },
-        validator: (value) {
-          // Validate the entered value, you can add your validation logic here
-          if (value == null || value.isEmpty) {
-            return '$fieldName is required';
-          }
-          return null;
-        },
-      ),
-    );
-  }
-
-  Widget _buildTextFieldss({
-    required TextEditingController controller,
-    required String hintText,
-    required IconData prefixIconData,
-    required String fieldName,
-  }) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        enabledBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.grey),
-        ),
-        focusedBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.blue),
-        ),
-        labelText: fieldName,
-        hintText: hintText,
-        filled: true,
-        fillColor: Colors.white,
-        prefixIcon: Icon(prefixIconData),
-        border: const OutlineInputBorder(),
-        suffixText: '@gmail.com',
-        suffixStyle: const TextStyle(color: Colors.blue),
-      ),
-      inputFormatters: [
-        FilteringTextInputFormatter.deny(RegExp(r'[A-Z]')),
-      ],
-      onChanged: (value) {
-        if (value.endsWith('@gmail.com')) {
-          controller.value = TextEditingValue(
-            text: value.substring(0, value.length - '@gmail.com'.length),
-            selection: TextSelection.collapsed(
-                offset: value.length - '@gmail.com'.length),
-          );
-        }
-      },
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please enter an email address.';
-        }
-        // Additional email validation logic if needed
-        return null;
-      },
-    );
-  }
-
-  //Normal TextField Method's
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String hintText,
-    required IconData prefixIconData,
-    required String fieldName,
-  }) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        enabledBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.grey),
-        ),
-        focusedBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.blue),
-        ),
-        hintText: hintText,
-        prefixIcon: Icon(prefixIconData),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(6),
-          borderSide: const BorderSide(
-            color: Colors.grey,
-            width: 2.0,
-          ),
-        ),
-        filled: true,
-        fillColor: Colors.white,
-      ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please enter $fieldName';
-        }
-        return null;
-      },
-    );
-  }
-
-  //Row TextField Method's
-  Widget _buildTextFields({
-    required TextEditingController controller,
-    required String hintText,
-    required IconData prefixIconData,
-    required String fieldName,
-  }) {
-    return SizedBox(
-      width: 150,
-      child: TextFormField(
-        controller: controller,
-        decoration: InputDecoration(
-          hintText: hintText,
-          prefixIcon: Icon(prefixIconData),
-          enabledBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.grey),
-          ),
-          focusedBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.blue),
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(6),
-            borderSide: const BorderSide(
-              color: Colors.grey,
-              width: 2.0,
-            ),
-          ),
-          filled: true,
-          fillColor: Colors.white,
-        ),
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'Please enter $fieldName';
-          }
-          return null;
-        },
-      ),
-    );
-  }
-
-  //Department DropDown Method's
-  Widget _buildDropdown({
-    required List<DropdownMenuItem<String>> items,
-    required String? selectedValue,
-    required String hintText,
-    required void Function(String?) onChanged,
-    required IconData prefixIconData,
-    required String fieldName,
-  }) {
-    return Container(
-      width: double.infinity,
-      child: DropdownButtonFormField<String>(
-        isExpanded: true,
-        value: selectedValue,
-        items: items,
-        decoration: InputDecoration(
-          hintText: hintText,
-          filled: true,
-          fillColor: Colors.white,
-          enabledBorder: OutlineInputBorder(
-            borderSide: const BorderSide(
-              color: Colors.grey,
-              width: 1.0,
-            ),
-            borderRadius: BorderRadius.circular(5.0),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: const BorderSide(
-              color: Colors.blue,
-              width: 1.0,
-            ),
-            borderRadius: BorderRadius.circular(5.0),
-          ),
-          border: OutlineInputBorder(
-            borderSide: BorderSide.none,
-            borderRadius: BorderRadius.circular(5.0),
-          ),
-          prefixIcon: Icon(prefixIconData),
-        ),
-        onChanged: onChanged,
-        style: const TextStyle(
-          color: Colors.black,
-        ),
-        iconEnabledColor: Colors.grey,
-        icon: const Icon(Icons.keyboard_arrow_down),
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'Please select $fieldName'; // Update the error message
-          }
-          return null;
-        },
-      ),
+      // backgroundColor: ThemeColor.log_background,
     );
   }
 
@@ -908,14 +704,14 @@ class _CreateEmployeeState extends State<CreateEmployee> {
               color: Colors.grey,
               width: 1.0,
             ),
-            borderRadius: BorderRadius.circular(5.0),
+            borderRadius: BorderRadius.circular(7.0),
           ),
           focusedBorder: OutlineInputBorder(
             borderSide: const BorderSide(
-              color: Colors.blue,
+              color: Colors.grey,
               width: 1.0,
             ),
-            borderRadius: BorderRadius.circular(5.0),
+            borderRadius: BorderRadius.circular(7.0),
           ),
           hintText: hintText,
           labelStyle: const TextStyle(fontSize: 10),
@@ -941,61 +737,6 @@ class _CreateEmployeeState extends State<CreateEmployee> {
             String formattedDate = DateFormat('yyyy-MM-dd').format(pickedDate);
             controller.text = formattedDate;
           }
-        },
-      ),
-    );
-  }
-
-  //Row side DropDown Method's
-  Widget _buildDropdowns({
-    required List<DropdownMenuItem<String>> items,
-    required String? selectedValue,
-    required String hintText,
-    required void Function(String?) onChanged,
-    required IconData prefixIconData,
-    required String fieldName,
-  }) {
-    return Container(
-      width: 150.0,
-      child: DropdownButtonFormField<String>(
-        isExpanded: true,
-        value: selectedValue,
-        items: items,
-        decoration: InputDecoration(
-          hintText: hintText,
-          filled: true,
-          fillColor: Colors.white,
-          enabledBorder: OutlineInputBorder(
-            borderSide: const BorderSide(
-              color: Colors.grey,
-              width: 1.0,
-            ),
-            borderRadius: BorderRadius.circular(5.0),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: const BorderSide(
-              color: Colors.blue,
-              width: 1.0,
-            ),
-            borderRadius: BorderRadius.circular(5.0),
-          ),
-          border: OutlineInputBorder(
-            borderSide: BorderSide.none,
-            borderRadius: BorderRadius.circular(5.0),
-          ),
-          prefixIcon: Icon(prefixIconData),
-        ),
-        onChanged: onChanged,
-        style: const TextStyle(
-          color: Colors.black,
-        ),
-        iconEnabledColor: Colors.grey,
-        icon: const Icon(Icons.keyboard_arrow_down),
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'Please select $fieldName'; // Update the error message
-          }
-          return null;
         },
       ),
     );

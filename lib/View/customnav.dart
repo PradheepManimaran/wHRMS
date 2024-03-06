@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wHRMS/ThemeColor/theme.dart';
 
 class CustomBottomNavigationBar extends StatefulWidget {
   final List<BottomNavigationBarItem> items;
@@ -13,9 +14,9 @@ class CustomBottomNavigationBar extends StatefulWidget {
     required this.items,
     required this.currentIndex,
     required this.onItemSelected,
-    this.backgroundColor = const Color(0xFF5F5DA0),
+    this.backgroundColor = ThemeColor.app_bar,
     this.selectedItemColor = const Color(0xFFEAEAF4),
-    this.unselectedItemColor = const Color(0xFF5F5DA0),
+    this.unselectedItemColor = ThemeColor.app_bar,
     required this.iconColor,
   });
 

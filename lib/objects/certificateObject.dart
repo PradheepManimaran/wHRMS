@@ -1,18 +1,18 @@
-class CertificateProfile {
+class Certificate {
   final String sslcCertificate;
   final String hscCertificate;
   final String ugCertificate;
   final String pgCertificate;
 
-  CertificateProfile({
+  Certificate({
     required this.sslcCertificate,
     required this.hscCertificate,
     required this.ugCertificate,
     required this.pgCertificate,
   });
 
-  factory CertificateProfile.fromJson(Map<String, dynamic> json) {
-    return CertificateProfile(
+  factory Certificate.fromJson(Map<String, dynamic> json) {
+    return Certificate(
       sslcCertificate: json['sslc_certificate'] ?? '',
       hscCertificate: json['hsc_certificate'] ?? '',
       ugCertificate: json['ug_certificate'] ?? '',

@@ -1,8 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:logger/logger.dart';
 import 'package:http/http.dart' as http;
 import 'package:wHRMS/ThemeColor/theme.dart';
 import 'package:wHRMS/apiHandlar/baseUrl.dart';
@@ -24,11 +24,12 @@ class SourceHire {
 }
 
 class _SourceHireScreenState extends State<SourceHireScreen> {
-  final Logger _logger = Logger();
+  // final Logger _logger = Logger();
 
   final List<SourceHire> sourceHire = [];
   TextEditingController nameController = TextEditingController();
   List<String> sourceHireData = [];
+  Timer? _timer;
 
   @override
   void initState() {
@@ -37,9 +38,19 @@ class _SourceHireScreenState extends State<SourceHireScreen> {
     _initAuthToken();
   }
 
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
   Future<void> _initAuthToken() async {
-    String token = await getAuthToken() as String;
-    _fetchHire(token);
+    // String token = await getAuthToken() as String;
+    _fetchHire();
+
+    _timer ??= Timer.periodic(const Duration(seconds: 1), (timer) {
+      _fetchHire();
+    });
   }
 
   Future<String?> getAuthToken() async {
@@ -47,10 +58,12 @@ class _SourceHireScreenState extends State<SourceHireScreen> {
     return prefs.getString('token');
   }
 
-  Future<void> _fetchHire(String token) async {
+  Future<void> _fetchHire() async {
     const String roleApiUrl = '${URLConstants.baseUrl}/api/source_hire';
 
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String token = prefs.getString('token') ?? '';
       final response = await http.get(
         Uri.parse(roleApiUrl),
         headers: {
@@ -60,9 +73,9 @@ class _SourceHireScreenState extends State<SourceHireScreen> {
       );
 
       if (response.statusCode == 200) {
-        _logger.d('Source_Hire Status Code : ${response.statusCode}');
-        _logger.d('Source_Hire fetched successfully');
-        _logger.d('Source_Hire response Body: ${response.body}');
+        // _logger.d('Source_Hire Status Code : ${response.statusCode}');
+        // _logger.d('Source_Hire fetched successfully');
+        // _logger.d('Source_Hire response Body: ${response.body}');
 
         final dynamic enrollData = json.decode(response.body);
 
@@ -77,14 +90,14 @@ class _SourceHireScreenState extends State<SourceHireScreen> {
             sourceHire.addAll(rolesList);
           });
         } else {
-          print('Invalid Source_Hire data format: $enrollData');
+          // print('Invalid Source_Hire data format: $enrollData');
           _showSnackBar('Invalid Source_Hire data format');
         }
       } else {
-        print(
-            'Error fetching Source_Hire. Status code: ${response.statusCode}');
-        print('Source_Hire Response body: ${response.body}');
-        print('Token : $token');
+        // print(
+        //     'Error fetching Source_Hire. Status code: ${response.statusCode}');
+        // print('Source_Hire Response body: ${response.body}');
+        // print('Token : $token');
       }
     } catch (e) {
       _handleError(e);
@@ -98,7 +111,7 @@ class _SourceHireScreenState extends State<SourceHireScreen> {
       String? token = await getAuthToken();
 
       if (token == null) {
-        print('Token not found in shared preferences');
+        // print('Token not found in shared preferences');
         return;
       }
       final name = nameController.text;
@@ -114,8 +127,8 @@ class _SourceHireScreenState extends State<SourceHireScreen> {
       );
 
       if (response.statusCode == 201) {
-        _logger.d('Source_Hire Status Code : ${response.statusCode}');
-        _logger.d('Source_Hire fetched successfully');
+        // _logger.d('Source_Hire Status Code : ${response.statusCode}');
+        // _logger.d('Source_Hire fetched successfully');
 
         // Parse the response body as a Map
         final Map<String, dynamic> responseBody = json.decode(response.body);
@@ -135,10 +148,32 @@ class _SourceHireScreenState extends State<SourceHireScreen> {
             nameController.addAll(nameController);
           });
         }
-      } else {
-        print(
-            'Post Error fetching Source_Hire. Status code: ${response.statusCode}');
-        print('Post Source_Hire Response body: ${response.body}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.green,
+            content: Text('Source Hire add Successfully'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      } else if (response.statusCode == 400) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.red,
+            content: Text('Bad Request'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        // print(
+        //     'Post Error fetching Source_Hire. Status code: ${response.statusCode}');
+        // print('Post Source_Hire Response body: ${response.body}');
+      } else if (response.statusCode == 500) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.red,
+            content: Text('Internal Server Error'),
+            duration: Duration(seconds: 2),
+          ),
+        );
       }
     } catch (e) {
       _handleError(e);
@@ -146,8 +181,8 @@ class _SourceHireScreenState extends State<SourceHireScreen> {
   }
 
   void _handleError(dynamic e) {
-    _logger.e('Error: $e');
-    print('Error: $e');
+    // _logger.e('Error: $e');
+    // print('Error: $e');
     if (e is SocketException) {
       _showSnackBar('No Internet Connection');
     }
@@ -172,7 +207,7 @@ class _SourceHireScreenState extends State<SourceHireScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Source_Hire',
+          'Source Hire',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
